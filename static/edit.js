@@ -11,13 +11,35 @@ function inChange(e) {
 
   let word = '';
   lis.innerHTML = '';
-  let indexWord = 1;
+  let backWord = 1;
 
-  while (plain.charAt(caretPos[0] - indexWord) != null &&
-    isLetter(plain.charAt(caretPos[0] - indexWord))) {
+  let filterFields = false;
 
-    word = plain.charAt(caretPos[0] - indexWord) + word;
-    indexWord += 1;
+  while (plain.charAt(caretPos[0] - backWord) != null &&
+    isLetter(plain.charAt(caretPos[0] - backWord))) {
+
+    word = plain.charAt(caretPos[0] - backWord) + word;
+    backWord += 1;
+  }
+
+  let forWord = 0;
+  while (plain.charAt(caretPos[0] + forWord) != null &&
+    isLetter(plain.charAt(caretPos[0] + forWord))) {
+
+    word += plain.charAt(caretPos[0] + forWord);
+    forWord += 1;
+  }
+  console.log('forward: ' + forWord + ' backWord: ' + backWord);
+
+  if (backWord != 1 || forWord != 0) {
+    while (plain.charAt(caretPos[0] - backWord) != null
+    && plain.charAt(caretPos[0] - backWord) != undefined
+      && (plain.charCodeAt(caretPos[0] - backWord) == 160
+        || plain.charCodeAt(caretPos[0] - backWord) == 32)) {
+
+      backWord += 1;
+    }
+    console.log(plain.charAt(caretPos[0] - backWord));
   }
 
   if (word != '') {
@@ -90,7 +112,7 @@ function inChange(e) {
   let formated = '';
 
   for (let i = 0; i < parMarks.length; i++) {
-    console.log(parMarks.charAt(i));
+    // console.log(parMarks.charAt(i));
 
     if (plain[i] === '(' || plain[i] === ')') {
 
@@ -104,18 +126,6 @@ function inChange(e) {
       formated += '<span>' + plain[i] + '</span>';
     }
   }
-  // for (let i = 0; i < plain.length; i++) {
-  //   if (plain[i] === '(' || plain[i] === ')') {
-
-  //     formated += '<span class=' + spanColors[parMarks.charAt(i)] + '>' + plain[i] + '</span>'
-
-  //   }
-  //   // else if()
-  //   else {
-  //     formated += '<span>' + plain[i] + '</span>';
-  //   }
-
-  // }
 
   input.innerHTML = formated;
   var range = document.createRange();
@@ -194,12 +204,12 @@ const fields = [
   {
     "id": "5c053da1-dd81-48d3-ab1a-21438a8c7246",
     "name": "CoErrors",
-    "category": "BUILT_IN"
+    "category": "FLOW"
   },
   {
     "id": "b64e11ec-817e-4b51-9d2d-d0fd3d9e710c",
     "name": "CoLowConfRejections",
-    "category": "BUILT_IN"
+    "category": "FLOW"
   },
   {
     "id": "100a3a79-1ffe-4a3d-af09-43017047ff56",
