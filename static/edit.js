@@ -8,7 +8,6 @@ function inChange(e) {
   let caretPos = getCaretPosition(input);
 
   plain = input.innerText;
-
   let word = '';
   lis.innerHTML = '';
   let backWord = 1;
@@ -29,29 +28,31 @@ function inChange(e) {
     word += plain.charAt(caretPos[0] + forWord);
     forWord += 1;
   }
-  console.log('forWord: ' + forWord + ' backWord: ' + backWord);
+  // console.log('forWord: ' + forWord + ' backWord: ' + backWord);
 
   if (backWord != 1 || forWord != 0) {
     while (plain.charAt(caretPos[0] - backWord) != null
-    && plain.charAt(caretPos[0] - backWord) != undefined
+      && plain.charAt(caretPos[0] - backWord) != undefined
       && (plain.charCodeAt(caretPos[0] - backWord) == 160
         || plain.charCodeAt(caretPos[0] - backWord) == 32)) {
 
       backWord += 1;
     }
-    console.log(plain.charAt(caretPos[0] - backWord));
+    // console.log('#'+plain.charAt(caretPos[0] - backWord)+'#');
   }
 
-  if (word != '') {
-    let ac = fields.filter((f) => {
+  if (plain.charAt(caretPos[0] - backWord) === '(') {
+    if (word != '') {
+      let ac = fields.filter((f) => {
 
-      return f.name.includes(word);
-    })
-    ac.forEach(f => {
-      let el = document.createElement('li');
-      el.innerText = f.name;
-      lis.appendChild(el);
-    })
+        return f.name.includes(word);
+      })
+      ac.forEach(f => {
+        let el = document.createElement('li');
+        el.innerText = f.name;
+        lis.appendChild(el);
+      })
+    }
   }
 
   spanColors = ['par1', 'par2', 'par3', 'par4'];
@@ -96,6 +97,40 @@ function inChange(e) {
       parMarks += 'OOO';
       i += 2;
     }
+    else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
+      console.log('===========================');
+      // console.log(isLetter(plain[i]) + '#' + !isLetter(plain[i - 1]));
+
+      let iOf = -1;
+      // console.log('fields length#' + fields.length);
+      let k = 0;
+      let notFound = true;
+      while (notFound && k < fields.length) {
+        console.log('name#' + fields[k].name);
+        iOf = plain.indexOf(fields[k].name, i);
+        console.log('iof#' + iOf + ' i#' + i);
+
+        if (iOf === i) {
+          let = cat ='N';
+          if (fields[k].category === 'BUILT_IN') {
+            cat='B';
+          }
+          else if (fields[k].category === 'FLOW') {
+            cat='F';
+          }
+            for (let m = 0; m < fields[k].name.length; m++) {
+              parMarks += cat;
+            }
+            notFound = false;
+            i += fields[k].name.length - 1;
+        }
+        k += 1;
+      }
+      if (notFound) {
+        parMarks += 'N';
+      }
+      console.log('===========================');
+    }
     else {
       parMarks += 'N';
     }
@@ -107,7 +142,7 @@ function inChange(e) {
   // }, '')
 
   console.log(parMarks);
-  console.log(plain);
+  // console.log(plain);
 
   let formated = '';
 
@@ -121,6 +156,14 @@ function inChange(e) {
     else if (parMarks[i] === 'O') {
 
       formated += '<span class="' + 'oper' + '">' + plain[i] + '</span>'
+    }
+    else if (parMarks[i] === 'B') {
+
+      formated += '<span class="' + 'built_in' + '">' + plain[i] + '</span>'
+    }
+    else if (parMarks[i] === 'F') {
+
+      formated += '<span class="' + 'flow' + '">' + plain[i] + '</span>'
     }
     else {
       formated += '<span>' + plain[i] + '</span>';
@@ -198,7 +241,7 @@ const fields = [
   },
   {
     "id": "ae46cfb3-60d3-4df4-9b2b-02d7050f0571",
-    "name": "AudioUri",
+    "name": "Aud",
     "category": "BUILT_IN"
   },
   {
@@ -208,7 +251,7 @@ const fields = [
   },
   {
     "id": "b64e11ec-817e-4b51-9d2d-d0fd3d9e710c",
-    "name": "CoLowConfRejections",
+    "name": "CoLowCon",
     "category": "FLOW"
   },
   {
