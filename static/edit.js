@@ -1,0 +1,239 @@
+let input = document.querySelector('.input');
+let lis = document.getElementById('auto');
+
+input.addEventListener('keyup', inChange);
+
+function inChange(e) {
+
+  let caretPos = getCaretPosition(input);
+
+  plain = input.innerText;
+
+  let word = '';
+  lis.innerHTML = '';
+  let indexWord = 1;
+
+  while (plain.charAt(caretPos[0] - indexWord) != null &&
+    isLetter(plain.charAt(caretPos[0] - indexWord))) {
+
+    word = plain.charAt(caretPos[0] - indexWord) + word;
+    indexWord += 1;
+  }
+
+  if (word != '') {
+    let ac = fields.filter((f) => {
+
+      return f.name.includes(word);
+    })
+    ac.forEach(f => {
+      let el = document.createElement('li');
+      el.innerText = f.name;
+      lis.appendChild(el);
+    })
+  }
+
+  spanColors = ['par1', 'par2', 'par3', 'par4'];
+  let parMarks = '';
+  depthIndex = -1;
+  opening = true;
+  // (() OR ()) AND ()
+
+
+  for (let i = 0; i < plain.length; i++) {
+
+    if (plain[i] === '(') {
+      if (opening === false) {
+        parMarks += depthIndex;
+        opening = true;
+      }
+      else {
+        depthIndex += 1;
+        parMarks += depthIndex;
+      }
+    }
+    else if (plain[i] === ')') {
+      if (opening === true) {
+
+        parMarks += depthIndex;
+        opening = false;
+      }
+      else {
+        depthIndex -= 1;
+        parMarks += depthIndex;
+      }
+    }
+    else if (plain[i] === 'O' && plain[i + 1] === 'R'
+      && !isLetter(plain[i - 1]) && !isLetter(plain[i + 2])) {
+
+      parMarks += 'OO';
+      i += 1;
+    }
+    else if (plain[i] === 'A' && plain[i + 1] === 'N' && plain[i + 2] === 'D'
+      && !isLetter(plain[i - 1]) && !isLetter(plain[i + 3])) {
+
+      parMarks += 'OOO';
+      i += 2;
+    }
+    else {
+      parMarks += 'N';
+    }
+  }
+  //normalize parMarks
+  // parMarks = [...parMarks].reduce((acc, curr) => {
+  //   acc += (4 - curr);
+  //   return acc;
+  // }, '')
+
+  console.log(parMarks);
+  console.log(plain);
+
+  let formated = '';
+
+  for (let i = 0; i < parMarks.length; i++) {
+    console.log(parMarks.charAt(i));
+
+    if (plain[i] === '(' || plain[i] === ')') {
+
+      formated += '<span class="' + spanColors[parMarks.charAt(i)] + '">' + plain[i] + '</span>'
+    }
+    else if (parMarks[i] === 'O') {
+
+      formated += '<span class="' + 'oper' + '">' + plain[i] + '</span>'
+    }
+    else {
+      formated += '<span>' + plain[i] + '</span>';
+    }
+  }
+  // for (let i = 0; i < plain.length; i++) {
+  //   if (plain[i] === '(' || plain[i] === ')') {
+
+  //     formated += '<span class=' + spanColors[parMarks.charAt(i)] + '>' + plain[i] + '</span>'
+
+  //   }
+  //   // else if()
+  //   else {
+  //     formated += '<span>' + plain[i] + '</span>';
+  //   }
+
+  // }
+
+  input.innerHTML = formated;
+  var range = document.createRange();
+  var sel = window.getSelection();
+  range.setStart(input, caretPos[0]);
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  input.focus();
+  // console.log(parMarks);
+
+}
+function isLetter(c) {
+  return c.toLowerCase() != c.toUpperCase();
+}
+// node_walk: walk the element tree, stop when func(node) returns false
+function node_walk(node, func) {
+  var result = func(node);
+  for (node = node.firstChild; result !== false && node; node = node.nextSibling)
+    result = node_walk(node, func);
+  return result;
+};
+
+// getCaretPosition: return [start, end] as offsets to elem.textContent that
+//   correspond to the selected portion of text
+//   (if start == end, caret is at given position and no text is selected)
+function getCaretPosition(elem) {
+  var sel = window.getSelection();
+  var cum_length = [0, 0];
+
+  if (sel.anchorNode == elem)
+    cum_length = [sel.anchorOffset, sel.extentOffset];
+  else {
+    var nodes_to_find = [sel.anchorNode, sel.extentNode];
+    if (!elem.contains(sel.anchorNode) || !elem.contains(sel.extentNode))
+      return undefined;
+    else {
+      var found = [0, 0];
+      var i;
+      node_walk(elem, function (node) {
+        for (i = 0; i < 2; i++) {
+          if (node == nodes_to_find[i]) {
+            found[i] = true;
+            if (found[i == 0 ? 1 : 0])
+              return false; // all done
+          }
+        }
+
+        if (node.textContent && !node.firstChild) {
+          for (i = 0; i < 2; i++) {
+            if (!found[i])
+              cum_length[i] += node.textContent.length;
+          }
+        }
+      });
+      cum_length[0] += sel.anchorOffset;
+      cum_length[1] += sel.extentOffset;
+    }
+  }
+  if (cum_length[0] <= cum_length[1])
+    return cum_length;
+  return [cum_length[1], cum_length[0]];
+}
+
+const fields = [
+  {
+    "id": "6baf1680-6711-4869-a16e-13244e440e0a",
+    "name": "Ani",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "ae46cfb3-60d3-4df4-9b2b-02d7050f0571",
+    "name": "AudioUri",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "5c053da1-dd81-48d3-ab1a-21438a8c7246",
+    "name": "CoErrors",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "b64e11ec-817e-4b51-9d2d-d0fd3d9e710c",
+    "name": "CoLowConfRejections",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "100a3a79-1ffe-4a3d-af09-43017047ff56",
+    "name": "CoNoInputs",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "3f4ad2d2-71f8-4809-9689-57339f498a30",
+    "name": "CoNoMatches",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "6e908664-ecec-4da2-ad87-489d5267b0c3",
+    "name": "CoRejections",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "9a7f8836-5486-4356-907e-3297ae4f3a01",
+    "name": "CoSameStateEvents",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "f1aea4e1-5a33-4575-86ac-cc46e76707a1",
+    "name": "CrError",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "549e0ec0-e721-4f63-a1f8-8ad93f39f467",
+    "name": "CuHour",
+    "category": "BUILT_IN"
+  },
+  {
+    "id": "a799af41-a94f-44ac-a28d-9928d4800b85",
+    "name": "CuTime",
+    "category": "BUILT_IN"
+  },
+]
