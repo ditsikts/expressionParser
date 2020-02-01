@@ -29,7 +29,7 @@ function inChange(e) {
     word += plain.charAt(caretPos[0] + forWord);
     forWord += 1;
   }
-  console.log('forward: ' + forWord + ' backWord: ' + backWord);
+  console.log('forWord: ' + forWord + ' backWord: ' + backWord);
 
   if (backWord != 1 || forWord != 0) {
     while (plain.charAt(caretPos[0] - backWord) != null
