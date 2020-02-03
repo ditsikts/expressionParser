@@ -5,7 +5,7 @@ input.addEventListener('keyup', inChange);
 
 function inChange(e) {
 
-  let caretPos = getCaretPosition(input);
+  let caretPos = getCaretCharacterOffsetWithin(input);
 
   plain = input.innerText;
   let word = '';
@@ -14,34 +14,34 @@ function inChange(e) {
 
   let filterFields = false;
 
-  while (plain.charAt(caretPos[0] - backWord) != null &&
-    isLetter(plain.charAt(caretPos[0] - backWord))) {
+  while (plain.charAt(caretPos - backWord) != null &&
+    isLetter(plain.charAt(caretPos - backWord))) {
 
-    word = plain.charAt(caretPos[0] - backWord) + word;
+    word = plain.charAt(caretPos - backWord) + word;
     backWord += 1;
   }
 
   let forWord = 0;
-  while (plain.charAt(caretPos[0] + forWord) != null &&
-    isLetter(plain.charAt(caretPos[0] + forWord))) {
+  while (plain.charAt(caretPos + forWord) != null &&
+    isLetter(plain.charAt(caretPos + forWord))) {
 
-    word += plain.charAt(caretPos[0] + forWord);
+    word += plain.charAt(caretPos + forWord);
     forWord += 1;
   }
   // console.log('forWord: ' + forWord + ' backWord: ' + backWord);
 
   if (backWord != 1 || forWord != 0) {
-    while (plain.charAt(caretPos[0] - backWord) != null
-      && plain.charAt(caretPos[0] - backWord) != undefined
-      && (plain.charCodeAt(caretPos[0] - backWord) == 160
-        || plain.charCodeAt(caretPos[0] - backWord) == 32)) {
+    while (plain.charAt(caretPos - backWord) != null
+      && plain.charAt(caretPos - backWord) != undefined
+      && (plain.charCodeAt(caretPos - backWord) == 160
+        || plain.charCodeAt(caretPos - backWord) == 32)) {
 
       backWord += 1;
     }
     // console.log('#'+plain.charAt(caretPos[0] - backWord)+'#');
   }
 
-  if (plain.charAt(caretPos[0] - backWord) === '(') {
+  if (plain.charAt(caretPos - backWord) === '(') {
     if (word != '') {
       let ac = fields.filter((f) => {
 
@@ -173,7 +173,7 @@ function inChange(e) {
   input.innerHTML = formated;
   var range = document.createRange();
   var sel = window.getSelection();
-  range.setStart(input, caretPos[0]);
+  range.setStart(input, caretPos);
   range.collapse(true);
   sel.removeAllRanges();
   sel.addRange(range);
@@ -184,54 +184,84 @@ function inChange(e) {
 function isLetter(c) {
   return c.toLowerCase() != c.toUpperCase();
 }
-// node_walk: walk the element tree, stop when func(node) returns false
-function node_walk(node, func) {
-  var result = func(node);
-  for (node = node.firstChild; result !== false && node; node = node.nextSibling)
-    result = node_walk(node, func);
-  return result;
-};
 
-// getCaretPosition: return [start, end] as offsets to elem.textContent that
-//   correspond to the selected portion of text
-//   (if start == end, caret is at given position and no text is selected)
-function getCaretPosition(elem) {
-  var sel = window.getSelection();
-  var cum_length = [0, 0];
+/*
+style="-webkit-user-select:text;" is needed for iPad
 
-  if (sel.anchorNode == elem)
-    cum_length = [sel.anchorOffset, sel.extentOffset];
-  else {
-    var nodes_to_find = [sel.anchorNode, sel.extentNode];
-    if (!elem.contains(sel.anchorNode) || !elem.contains(sel.extentNode))
-      return undefined;
-    else {
-      var found = [0, 0];
-      var i;
-      node_walk(elem, function (node) {
-        for (i = 0; i < 2; i++) {
-          if (node == nodes_to_find[i]) {
-            found[i] = true;
-            if (found[i == 0 ? 1 : 0])
-              return false; // all done
-          }
-        }
-
-        if (node.textContent && !node.firstChild) {
-          for (i = 0; i < 2; i++) {
-            if (!found[i])
-              cum_length[i] += node.textContent.length;
-          }
-        }
-      });
-      cum_length[0] += sel.anchorOffset;
-      cum_length[1] += sel.extentOffset;
+*/
+function getCaretCharacterOffsetWithin(element) {
+  var caretOffset = 0;
+  var doc = element.ownerDocument || element.document;
+  var win = doc.defaultView || doc.parentWindow;
+  var sel;
+  if (typeof win.getSelection != "undefined") {
+    sel = win.getSelection();
+    if (sel.rangeCount > 0) {
+      var range = win.getSelection().getRangeAt(0);
+      var preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      caretOffset = preCaretRange.toString().length;
     }
+  } else if ((sel = doc.selection) && sel.type != "Control") {
+    var textRange = sel.createRange();
+    var preCaretTextRange = doc.body.createTextRange();
+    preCaretTextRange.moveToElementText(element);
+    preCaretTextRange.setEndPoint("EndToEnd", textRange);
+    caretOffset = preCaretTextRange.text.length;
   }
-  if (cum_length[0] <= cum_length[1])
-    return cum_length;
-  return [cum_length[1], cum_length[0]];
+  return caretOffset;
 }
+
+
+// // node_walk: walk the element tree, stop when func(node) returns false
+// function node_walk(node, func) {
+//   var result = func(node);
+//   for (node = node.firstChild; result !== false && node; node = node.nextSibling)
+//     result = node_walk(node, func);
+//   return result;
+// };
+
+// // getCaretPosition: return [start, end] as offsets to elem.textContent that
+// //   correspond to the selected portion of text
+// //   (if start == end, caret is at given position and no text is selected)
+// function getCaretPosition(elem) {
+//   var sel = window.getSelection();
+//   var cum_length = [0, 0];
+
+//   if (sel.anchorNode == elem)
+//     cum_length = [sel.anchorOffset, sel.extentOffset];
+//   else {
+//     var nodes_to_find = [sel.anchorNode, sel.extentNode];
+//     if (!elem.contains(sel.anchorNode) || !elem.contains(sel.extentNode))
+//       return undefined;
+//     else {
+//       var found = [0, 0];
+//       var i;
+//       node_walk(elem, function (node) {
+//         for (i = 0; i < 2; i++) {
+//           if (node == nodes_to_find[i]) {
+//             found[i] = true;
+//             if (found[i == 0 ? 1 : 0])
+//               return false; // all done
+//           }
+//         }
+
+//         if (node.textContent && !node.firstChild) {
+//           for (i = 0; i < 2; i++) {
+//             if (!found[i])
+//               cum_length[i] += node.textContent.length;
+//           }
+//         }
+//       });
+//       cum_length[0] += sel.anchorOffset;
+//       cum_length[1] += sel.extentOffset;
+//     }
+//   }
+//   if (cum_length[0] <= cum_length[1])
+//     return cum_length;
+//   return [cum_length[1], cum_length[0]];
+// }
 
 const fields = [
   {
