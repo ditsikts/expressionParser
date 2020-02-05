@@ -2,10 +2,10 @@ let input = document.querySelector('.input');
 let lis = document.getElementById('auto');
 
 input.addEventListener('keyup', inChange);
-
+var caret = new VanillaCaret(input);
 function inChange(e) {
 
-  let caretPos = getCaretCharacterOffsetWithin(input);
+  let caretPos = caret.getPos();
 
   plain = input.innerText;
   let word = '';
@@ -171,13 +171,15 @@ function inChange(e) {
   }
 
   input.innerHTML = formated;
-  var range = document.createRange();
-  var sel = window.getSelection();
-  range.setStart(input, caretPos);
-  range.collapse(true);
-  sel.removeAllRanges();
-  sel.addRange(range);
-  input.focus();
+
+  caret.setPos(caretPos);
+  // var range = document.createRange();
+  // var sel = window.getSelection();
+  // range.setStart(input, caretPos);
+  // range.collapse(true);
+  // sel.removeAllRanges();
+  // sel.addRange(range);
+  // input.focus();
   // console.log(parMarks);
 
 }
