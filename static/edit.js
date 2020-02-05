@@ -3,6 +3,8 @@ let lis = document.getElementById('auto');
 
 input.addEventListener('keyup', inChange);
 var caret = new VanillaCaret(input);
+
+
 function inChange(e) {
 
   let caretPos = caret.getPos();
@@ -43,7 +45,7 @@ function inChange(e) {
 
   if (plain.charAt(caretPos - backWord) === '(') {
     if (word != '') {
-      let ac = fields.filter((f) => {
+      let ac = cities.filter((f) => {
 
         return f.name.includes(word);
       })
@@ -105,24 +107,24 @@ function inChange(e) {
       // console.log('fields length#' + fields.length);
       let k = 0;
       let notFound = true;
-      while (notFound && k < fields.length) {
-        console.log('name#' + fields[k].name);
-        iOf = plain.indexOf(fields[k].name, i);
+      while (notFound && k < cities.length) {
+        console.log('name#' + cities[k].name);
+        iOf = plain.indexOf(cities[k].name, i);
         console.log('iof#' + iOf + ' i#' + i);
 
         if (iOf === i) {
           let = cat = 'N';
-          if (fields[k].category === 'BUILT_IN') {
-            cat = 'B';
+          if (cities[k].country === 'USA') {
+            cat = 'U';
           }
-          else if (fields[k].category === 'FLOW') {
-            cat = 'F';
+          else if (cities[k].country === 'Italy') {
+            cat = 'I';
           }
-          for (let m = 0; m < fields[k].name.length; m++) {
+          for (let m = 0; m < cities[k].name.length; m++) {
             parMarks += cat;
           }
           notFound = false;
-          i += fields[k].name.length - 1;
+          i += cities[k].name.length - 1;
         }
         k += 1;
       }
@@ -161,21 +163,21 @@ function inChange(e) {
       i--;
       formated += '<span class="' + 'oper' + '">' + cWord + '</span>'
     }
-    else if (parMarks[i] === 'B') {
-      while (parMarks[i] === 'B') {
+    else if (parMarks[i] === 'U') {
+      while (parMarks[i] === 'U') {
         cWord += plain[i];
         i++;
       }
       i--;
-      formated += '<span class="' + 'built_in' + '">' + cWord + '</span>'
+      formated += '<span class="' + 'usa' + '">' + cWord + '</span>'
     }
-    else if (parMarks[i] === 'F') {
-      while (parMarks[i] === 'F') {
+    else if (parMarks[i] === 'I') {
+      while (parMarks[i] === 'I') {
         cWord += plain[i];
         i++;
       }
       i--;
-      formated += '<span class="' + 'flow' + '">' + cWord + '</span>'
+      formated += '<span class="' + 'italy' + '">' + cWord + '</span>'
     }
     else {
       formated += '<span>' + plain[i] + '</span>';
@@ -228,60 +230,60 @@ style="-webkit-user-select:text;" is needed for iPad
 //   return caretOffset;
 // }
 
-const fields = [
+const cities = [
   {
-    "id": "6baf1680-6711-4869-a16e-13244e440e0a",
-    "name": "Ani",
-    "category": "BUILT_IN"
+    "id": "1",
+    "name": "California",
+    "country": "USA"
   },
   {
-    "id": "ae46cfb3-60d3-4df4-9b2b-02d7050f0571",
-    "name": "Aud",
-    "category": "BUILT_IN"
+    "id": "2",
+    "name": "Seattle",
+    "country": "USA"
   },
   {
-    "id": "5c053da1-dd81-48d3-ab1a-21438a8c7246",
-    "name": "CoErrors",
-    "category": "FLOW"
+    "id": "3",
+    "name": "New_York",
+    "country": "USA"
   },
   {
-    "id": "b64e11ec-817e-4b51-9d2d-d0fd3d9e710c",
-    "name": "CoLowCon",
-    "category": "FLOW"
+    "id": "4",
+    "name": "Venice",
+    "country": "Italy"
   },
   {
-    "id": "100a3a79-1ffe-4a3d-af09-43017047ff56",
-    "name": "CoNoInputs",
-    "category": "BUILT_IN"
+    "id": "5",
+    "name": "Rome",
+    "country": "Italy"
   },
   {
-    "id": "3f4ad2d2-71f8-4809-9689-57339f498a30",
-    "name": "CoNoMatches",
-    "category": "BUILT_IN"
+    "id": "6",
+    "name": "Tokyo",
+    "country": "Japan"
   },
   {
-    "id": "6e908664-ecec-4da2-ad87-489d5267b0c3",
-    "name": "CoRejections",
-    "category": "BUILT_IN"
+    "id": "7",
+    "name": "Moscow",
+    "country": "Russia"
   },
   {
-    "id": "9a7f8836-5486-4356-907e-3297ae4f3a01",
-    "name": "CoSameStateEvents",
-    "category": "BUILT_IN"
+    "id": "8",
+    "name": "Madrid",
+    "country": "Spain"
   },
   {
-    "id": "f1aea4e1-5a33-4575-86ac-cc46e76707a1",
-    "name": "CrError",
-    "category": "BUILT_IN"
+    "id": "9",
+    "name": "Athens",
+    "country": "Greece"
   },
   {
-    "id": "549e0ec0-e721-4f63-a1f8-8ad93f39f467",
-    "name": "CuHour",
-    "category": "BUILT_IN"
+    "id": "10",
+    "name": "Paris",
+    "country": "France"
   },
   {
-    "id": "a799af41-a94f-44ac-a28d-9928d4800b85",
-    "name": "CuTime",
-    "category": "BUILT_IN"
+    "id": "11",
+    "name": "London",
+    "country": "GB"
   },
 ]
