@@ -4,17 +4,10 @@ let lis = document.getElementById('auto');
 input.addEventListener('keyup', inChange);
 var caret = new VanillaCaret(input);
 
+const wordAtCaret = (plain, caretPos) => {
 
-function inChange(e) {
-
-  let caretPos = caret.getPos();
-
-  plain = input.innerText;
   let word = '';
-  lis.innerHTML = '';
   let backWord = 1;
-
-  let filterFields = false;
 
   while (plain.charAt(caretPos - backWord) != null &&
     isLetter(plain.charAt(caretPos - backWord))) {
@@ -30,18 +23,28 @@ function inChange(e) {
     word += plain.charAt(caretPos + forWord);
     forWord += 1;
   }
-  // console.log('forWord: ' + forWord + ' backWord: ' + backWord);
 
-  if (backWord != 1 || forWord != 0) {
+  if (word.length > 0) {
     while (plain.charAt(caretPos - backWord) != null
       && plain.charAt(caretPos - backWord) != undefined
       && (plain.charCodeAt(caretPos - backWord) == 160
         || plain.charCodeAt(caretPos - backWord) == 32)) {
 
-      backWord += 1;
+      backWord += 1;//keeps position of previous non space char
     }
-    // console.log('#'+plain.charAt(caretPos[0] - backWord)+'#');
+
   }
+  return [word, backWord];
+}
+
+function inChange(e) {
+
+  let caretPos = caret.getPos();
+
+  plain = input.innerText;
+  lis.innerHTML = '';
+
+  const [word, backWord] = wordAtCaret(plain, caretPos);
 
   if (plain.charAt(caretPos - backWord) === '(') {
     if (word != '') {
@@ -57,11 +60,9 @@ function inChange(e) {
     }
   }
 
-  spanColors = ['par1', 'par2', 'par3', 'par4'];
   let parMarks = '';
-  depthIndex = -1;
+  depthIndex = 0;
   opening = true;
-  // (() OR ()) AND ()
 
 
   for (let i = 0; i < plain.length; i++) {
@@ -100,17 +101,12 @@ function inChange(e) {
       i += 2;
     }
     else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
-      console.log('===========================');
-      // console.log(isLetter(plain[i]) + '#' + !isLetter(plain[i - 1]));
 
       let iOf = -1;
-      // console.log('fields length#' + fields.length);
       let k = 0;
       let notFound = true;
       while (notFound && k < cities.length) {
-        console.log('name#' + cities[k].name);
         iOf = plain.indexOf(cities[k].name, i);
-        console.log('iof#' + iOf + ' i#' + i);
 
         if (iOf === i) {
           let = cat = 'N';
@@ -131,7 +127,7 @@ function inChange(e) {
       if (notFound) {
         parMarks += 'N';
       }
-      console.log('===========================');
+
     }
     else {
       parMarks += 'N';
@@ -153,7 +149,7 @@ function inChange(e) {
 
     if (plain[i] === '(' || plain[i] === ')') {
 
-      formated += '<span class="' + spanColors[parMarks.charAt(i)] + '">' + plain[i] + '</span>'
+      formated += '<span class="par' + parMarks.charAt(i) + '">' + plain[i] + '</span>'
     }
     else if (parMarks[i] === 'O') {
       while (parMarks[i] === 'O') {
@@ -188,47 +184,19 @@ function inChange(e) {
   input.innerHTML = formated;
 
   caret.setPos(caretPos);
-  // var range = document.createRange();
-  // var sel = window.getSelection();
-  // range.setStart(input, caretPos);
-  // range.collapse(true);
-  // sel.removeAllRanges();
-  // sel.addRange(range);
-  // input.focus();
-  // console.log(parMarks);
+  console.log(groups.buildings.oper[0]);
 
 }
 function isLetter(c) {
   return c.toLowerCase() != c.toUpperCase();
 }
 
-/*
-style="-webkit-user-select:text;" is needed for iPad
-
-*/
-// function getCaretCharacterOffsetWithin(element) {
-//   var caretOffset = 0;
-//   var doc = element.ownerDocument || element.document;
-//   var win = doc.defaultView || doc.parentWindow;
-//   var sel;
-//   if (typeof win.getSelection != "undefined") {
-//     sel = win.getSelection();
-//     if (sel.rangeCount > 0) {
-//       var range = win.getSelection().getRangeAt(0);
-//       var preCaretRange = range.cloneRange();
-//       preCaretRange.selectNodeContents(element);
-//       preCaretRange.setEnd(range.endContainer, range.endOffset);
-//       caretOffset = preCaretRange.toString().length;
-//     }
-//   } else if ((sel = doc.selection) && sel.type != "Control") {
-//     var textRange = sel.createRange();
-//     var preCaretTextRange = doc.body.createTextRange();
-//     preCaretTextRange.moveToElementText(element);
-//     preCaretTextRange.setEndPoint("EndToEnd", textRange);
-//     caretOffset = preCaretTextRange.text.length;
-//   }
-//   return caretOffset;
-// }
+const groups = {
+  buildings: {
+    oper: ['have', 'not_have'],
+    props: ['Stadium', 'Zoo', 'Casino']
+  }
+}
 
 const cities = [
   {
@@ -287,3 +255,4 @@ const cities = [
     "country": "GB"
   },
 ]
+
