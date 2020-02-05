@@ -162,12 +162,20 @@ function inChange(e) {
       formated += '<span class="' + 'oper' + '">' + cWord + '</span>'
     }
     else if (parMarks[i] === 'B') {
-
-      formated += '<span class="' + 'built_in' + '">' + plain[i] + '</span>'
+      while (parMarks[i] === 'B') {
+        cWord += plain[i];
+        i++;
+      }
+      i--;
+      formated += '<span class="' + 'built_in' + '">' + cWord + '</span>'
     }
     else if (parMarks[i] === 'F') {
-
-      formated += '<span class="' + 'flow' + '">' + plain[i] + '</span>'
+      while (parMarks[i] === 'F') {
+        cWord += plain[i];
+        i++;
+      }
+      i--;
+      formated += '<span class="' + 'flow' + '">' + cWord + '</span>'
     }
     else {
       formated += '<span>' + plain[i] + '</span>';

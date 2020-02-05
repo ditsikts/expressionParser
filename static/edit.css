@@ -1,0 +1,38 @@
+* {
+    margin: 0px;
+    font-size: 1.2em;
+  }
+
+  .input {
+    border: 1px solid #aaa;
+    margin: 10;
+    width: 900px;
+    caret-color: black;
+  }
+  .flow {
+    background-color: darkkhaki;
+  }
+  .built_in {
+    border-color: palevioletred;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 3px;
+  }
+  .oper {
+    color:cornflowerblue;
+  }
+  .par1 {
+    color: blue;
+  }
+
+  .par2 {
+    color: green;
+  }
+
+  .par3 {
+    color: red;
+  }
+
+  .par4 {
+    color: orange;
+  }
