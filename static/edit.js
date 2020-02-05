@@ -144,6 +144,11 @@ function inChange(e) {
 
   let formated = '';
   let cWord = '';
+
+  // const gatherSimilarChars = (character)=>{
+
+  // }
+
   for (let i = 0; i < parMarks.length; i++) {
     // console.log(parMarks.charAt(i));
 
@@ -152,6 +157,8 @@ function inChange(e) {
       formated += '<span class="par' + parMarks.charAt(i) + '">' + plain[i] + '</span>'
     }
     else if (parMarks[i] === 'O') {
+      cWord += plain[i];
+      i++;
       while (parMarks[i] === 'O') {
         cWord += plain[i];
         i++;
@@ -160,6 +167,8 @@ function inChange(e) {
       formated += '<span class="' + 'oper' + '">' + cWord + '</span>'
     }
     else if (parMarks[i] === 'U') {
+      cWord += plain[i];
+      i++;
       while (parMarks[i] === 'U') {
         cWord += plain[i];
         i++;
@@ -168,6 +177,8 @@ function inChange(e) {
       formated += '<span class="' + 'usa' + '">' + cWord + '</span>'
     }
     else if (parMarks[i] === 'I') {
+      cWord += plain[i];
+      i++;
       while (parMarks[i] === 'I') {
         cWord += plain[i];
         i++;
