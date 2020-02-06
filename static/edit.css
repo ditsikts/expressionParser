@@ -41,3 +41,6 @@
   .par4 {
     color: orange;
   }
+  .error {
+    border-bottom: 5px solid red;
+  }

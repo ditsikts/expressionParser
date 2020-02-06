@@ -67,7 +67,10 @@ function inChange(e) {
 
   for (let i = 0; i < plain.length; i++) {
 
-    if (plain[i] === '(') {
+    if (plain.charCodeAt(i) === 160) {
+      parMarks += 'S';
+    }
+    else if (plain[i] === '(') {
       if (opening === false) {
         parMarks += depthIndex;
         opening = true;
@@ -186,8 +189,11 @@ function inChange(e) {
       i--;
       formated += '<span class="' + 'italy' + '">' + cWord + '</span>'
     }
-    else {
+    else if (parMarks[i] === 'S') {
       formated += '<span>' + plain[i] + '</span>';
+    }
+    else {
+      formated += '<span class="' + 'error' + '">' + plain[i] + '</span>';
     }
     cWord = '';
   }
