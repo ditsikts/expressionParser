@@ -116,7 +116,7 @@ function inChange(e) {
         iOf = plain.indexOf(cities[k].name, i);
 
         if (iOf === i) {
-          let = cat = 'N';
+          let cat = 'N';
           if (cities[k].country === 'USA') {
             cat = 'U';
           }
@@ -152,12 +152,8 @@ function inChange(e) {
   let formated = '';
   let cWord = '';
 
-  // const gatherSimilarChars = (character)=>{
-
-  // }
 
   for (let i = 0; i < parMarks.length; i++) {
-    // console.log(parMarks.charAt(i));
 
     if (plain[i] === '(' || plain[i] === ')') {
 
@@ -232,7 +228,7 @@ const cities = [
   },
   {
     "id": "3",
-    "name": "New_York",
+    "name": "NewYork",
     "country": "USA"
   },
   {
