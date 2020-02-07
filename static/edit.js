@@ -4,6 +4,17 @@ let lis = document.getElementById('auto');
 input.addEventListener('keyup', inChange);
 var caret = new VanillaCaret(input);
 
+
+const previousChar = (wordStartPos) => {
+  while (plain.charAt(wordStartPos) != null
+    && plain.charAt(wordStartPos) != undefined
+    && (plain.charCodeAt(wordStartPos) == 160
+      || plain.charCodeAt(wordStartPos) == 32)) {
+
+    wordStartPos -= 1;//keeps position of previous non space char
+  }
+  return wordStartPos;
+}
 const wordAtCaret = (plain, caretPos) => {
 
   let word = '';
@@ -23,16 +34,9 @@ const wordAtCaret = (plain, caretPos) => {
     word += plain.charAt(caretPos + forWord);
     forWord += 1;
   }
-
+  backWord = caretPos - backWord;
   if (word.length > 0) {
-    while (plain.charAt(caretPos - backWord) != null
-      && plain.charAt(caretPos - backWord) != undefined
-      && (plain.charCodeAt(caretPos - backWord) == 160
-        || plain.charCodeAt(caretPos - backWord) == 32)) {
-
-      backWord += 1;//keeps position of previous non space char
-    }
-
+    backWord = previousChar(backWord);
   }
   return [word, backWord];
 }
@@ -46,7 +50,7 @@ function inChange(e) {
 
   const [word, backWord] = wordAtCaret(plain, caretPos);
 
-  if (plain.charAt(caretPos - backWord) === '(') {
+  if (plain.charAt(backWord) === '(') {
     if (word != '') {
       let ac = cities.filter((f) => {
 
