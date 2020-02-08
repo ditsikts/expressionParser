@@ -40,12 +40,14 @@ const wordAtCaret = (plain, caretPos) => {
   }
   return [word, backWord];
 }
-
+let previousPlain = '';
+let plain = '';
 function inChange(e) {
-
+  plain = input.innerText;
+  if (plain === previousPlain) { return; }
+  previousPlain = plain;
   let caretPos = caret.getPos();
 
-  plain = input.innerText;
   lis.innerHTML = '';
 
   console.log('start' + plain);
