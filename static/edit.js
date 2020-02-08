@@ -48,6 +48,7 @@ function inChange(e) {
   plain = input.innerText;
   lis.innerHTML = '';
 
+  console.log('start' + plain);
   const [word, backWord] = wordAtCaret(plain, caretPos);
 
   if (plain.charAt(backWord) === '(') {
@@ -64,47 +65,54 @@ function inChange(e) {
     }
   }
 
-  let parMarks = '';
   depthIndex = 0;
   opening = true;
 
+  let parMarks2 = [];
+  let simiChars = '';
 
   for (let i = 0; i < plain.length; i++) {
 
-    if (plain.charCodeAt(i) === 160) {
-      parMarks += 'S';
+    if (plain.charCodeAt(i) === 160
+      || plain.charCodeAt(i) === 32) {
+      simiChars += '&nbsp;';
+      i++;
+      while (plain.charCodeAt(i) === 160 || plain.charCodeAt(i) === 32) {
+        simiChars += '&nbsp;';
+        i++;
+      }
+      i--;
+      parMarks2.push({ text: simiChars, cssClass: 'nostyle' })
+      simiChars = '';
     }
     else if (plain[i] === '(') {
       if (opening === false) {
-        parMarks += depthIndex;
         opening = true;
       }
       else {
         depthIndex += 1;
-        parMarks += depthIndex;
       }
+      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex })
     }
     else if (plain[i] === ')') {
       if (opening === true) {
-
-        parMarks += depthIndex;
         opening = false;
       }
       else {
         depthIndex -= 1;
-        parMarks += depthIndex;
       }
+      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex })
     }
     else if (plain[i] === 'O' && plain[i + 1] === 'R'
       && !isLetter(plain[i - 1]) && !isLetter(plain[i + 2])) {
 
-      parMarks += 'OO';
+      parMarks2.push({ text: 'OR', cssClass: 'oper' })
       i += 1;
     }
     else if (plain[i] === 'A' && plain[i + 1] === 'N' && plain[i + 2] === 'D'
       && !isLetter(plain[i - 1]) && !isLetter(plain[i + 3])) {
 
-      parMarks += 'OOO';
+      parMarks2.push({ text: 'AND', cssClass: 'oper' })
       i += 2;
     }
     else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
@@ -116,92 +124,49 @@ function inChange(e) {
         iOf = plain.indexOf(cities[k].name, i);
 
         if (iOf === i) {
-          let cat = 'N';
-          if (cities[k].country === 'USA') {
-            cat = 'U';
-          }
-          else if (cities[k].country === 'Italy') {
-            cat = 'I';
-          }
-          for (let m = 0; m < cities[k].name.length; m++) {
-            parMarks += cat;
-          }
+          parMarks2.push({ text: cities[k].name, cssClass: cssClass[cities[k].country] })
           notFound = false;
           i += cities[k].name.length - 1;
         }
         k += 1;
       }
       if (notFound) {
-        parMarks += 'N';
+        const [word,] = wordAtCaret(plain, i);
+        parMarks2.push({ text: word, cssClass: 'error' });
+        i += word.length - 1;
       }
 
     }
     else {
-      parMarks += 'N';
+      parMarks2.push({ text: plain[i], cssClass: 'error' })
+      console.log('#' + plain[i] + '#');
+      // console.log('charcode #' + plain.charCodeAt(i) + '#');
+
     }
+
   }
+
   //normalize parMarks
   // parMarks = [...parMarks].reduce((acc, curr) => {
   //   acc += (4 - curr);
   //   return acc;
   // }, '')
 
-  console.log(parMarks);
-  // console.log(plain);
-
+  input.innerHTML = '';
   let formated = '';
-  let cWord = '';
 
-
-  for (let i = 0; i < parMarks.length; i++) {
-
-    if (plain[i] === '(' || plain[i] === ')') {
-
-      formated += '<span class="par' + parMarks.charAt(i) + '">' + plain[i] + '</span>'
-    }
-    else if (parMarks[i] === 'O') {
-      cWord += plain[i];
-      i++;
-      while (parMarks[i] === 'O') {
-        cWord += plain[i];
-        i++;
-      }
-      i--;
-      formated += '<span class="' + 'oper' + '">' + cWord + '</span>'
-    }
-    else if (parMarks[i] === 'U') {
-      cWord += plain[i];
-      i++;
-      while (parMarks[i] === 'U') {
-        cWord += plain[i];
-        i++;
-      }
-      i--;
-      formated += '<span class="' + 'usa' + '">' + cWord + '</span>'
-    }
-    else if (parMarks[i] === 'I') {
-      cWord += plain[i];
-      i++;
-      while (parMarks[i] === 'I') {
-        cWord += plain[i];
-        i++;
-      }
-      i--;
-      formated += '<span class="' + 'italy' + '">' + cWord + '</span>'
-    }
-    else if (parMarks[i] === 'S') {
-      formated += '<span>' + plain[i] + '</span>';
-    }
-    else {
-      formated += '<span class="' + 'error' + '">' + plain[i] + '</span>';
-    }
-    cWord = '';
+  for (let i = 0; i < parMarks2.length; i++) {
+    formated += '<span class="' + parMarks2[i].cssClass + '">' + parMarks2[i].text + '</span>';
   }
+  console.log('end' + plain);
+  console.log(parMarks2);
+  console.log(formated);
+
 
   input.innerHTML = formated;
 
   caret.setPos(caretPos);
-  console.log(groups.buildings.oper[0]);
+  // console.log(groups.buildings.oper[0]);
 
 }
 function isLetter(c) {
@@ -215,6 +180,10 @@ const groups = {
   }
 }
 
+const cssClass = {
+  Italy: 'italy',
+  USA: 'usa'
+}
 const cities = [
   {
     "id": "1",

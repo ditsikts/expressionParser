@@ -44,3 +44,6 @@
   .error {
     border-bottom: 5px solid red;
   }
+  .nostyle{
+    color: unset;
+  }
