@@ -34,11 +34,9 @@ const wordAtIndex = (plain, caretPos) => {
     word += plain.charAt(caretPos + forWord);
     forWord += 1;
   }
-  backWord = caretPos - backWord;
-  // if (word.length > 0) {
-  //   backWord = previousChar(backWord);
-  // }
-  return [word, backWord];
+
+
+  return [word, forWord, backWord - 1];
 }
 
 let previousPlain = '';
@@ -194,23 +192,8 @@ function inChange(e) {
 
   }
 
-  const [word,] = wordAtIndex(plain, caretPos);
+  const [word, forWord, backWord] = wordAtIndex(plain, caretPos);
 
-  // let elementAtCaret = parMarks2.reduce(
-  //   (acc, cur, idx) => {
-  //     let curLength =cur.text.length;
-  //     if(cur.text.includes('&nbsp;')){
-  //       curLength = (cur.text.match(/&nbsp;/g)).length;
-  //     }
-  //     if (acc < curLength) {
-
-  //       return acc;
-
-  //     }
-  //     return acc -= curLength;
-  //   }, caretPos);
-
-  // console.log(elementAtCaret);
 
   if (word != '') {
     let caretPosTemp = caretPos;
@@ -219,20 +202,29 @@ function inChange(e) {
     while (caretPosTemp > curLength) {
       curLength = parMarks2[idx].text.length;
       if (parMarks2[idx].text.includes('&nbsp;')) {
-        curLength = (parMarks2[idx].text.match(/&nbsp;/g)).length;
+        curLength = parMarks2[idx].text.length / 6;
+        console.log(curLength);
+
       }
       if (caretPosTemp < curLength) {
         break
       }
       caretPosTemp -= curLength;
+      curLength = 0;
       idx += 1;
     }
-    console.log("idx :" + idx + " caretPosTemp :" + caretPosTemp);
-    if (caretPosTemp === 0) { idx--; }
-    if (parMarks2[idx - 1].text === '('
-      || parMarks2[idx - 2].type === 'operator'
+    console.log("idx :" + idx + " caretPosTemp :" + caretPosTemp + " caretPos :" + caretPos + " forWord :" + forWord + " backWord :" + backWord + " word :" + word);
+    // if (forWord === 0) { idx--; }
+    console.log('idx   :' + parMarks2[idx].text);
+    console.log('idx-1 :' + parMarks2[idx - 1].text);
+    console.log('idx-2 :' + parMarks2[idx - 2].text);
+    if (backWord === 0) {
+    }
+    if (parMarks2[idx-1].text === '('
+      // || parMarks2[idx - 2].type === 'operator'
       || (parMarks2[idx - 2].text === '('
-        && parMarks2[idx - 1].type === 'whitespace')) {
+        && parMarks2[idx-1].type === 'whitespace')
+    ) {
 
 
       let ac = leftPart.cities.filter((f) => {
@@ -245,6 +237,7 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
+
 
 
 
@@ -264,7 +257,7 @@ function inChange(e) {
     formated += '<span class="' + parMarks2[i].cssClass + '">' + parMarks2[i].text + '</span>';
   }
   // console.log('end' + plain);
-  console.log(parMarks2);
+  // console.log(parMarks2);
   // console.log(formated);
 
 
