@@ -40,8 +40,10 @@ const wordAtCaret = (plain, caretPos) => {
   }
   return [word, backWord];
 }
+
 let previousPlain = '';
 let plain = '';
+
 function inChange(e) {
   plain = input.innerText;
   if (plain === previousPlain) { return; }
@@ -50,7 +52,7 @@ function inChange(e) {
 
   lis.innerHTML = '';
 
-  console.log('start' + plain);
+  // console.log('start' + plain);
   const [word, backWord] = wordAtCaret(plain, caretPos);
 
   if (plain.charAt(backWord) === '(') {
@@ -126,7 +128,15 @@ function inChange(e) {
         iOf = plain.indexOf(cities[k].name, i);
 
         if (iOf === i) {
-          parMarks2.push({ text: cities[k].name, cssClass: cssClass[cities[k].country] })
+          if ( parMarks2[parMarks2.length - 1].text === '('
+            || parMarks2[parMarks2.length - 2].cssClass === 'oper'
+            || (parMarks2[parMarks2.length - 2].text === '('
+              && parMarks2[parMarks2.length - 1].cssClass === 'nostyle')) {
+            parMarks2.push({ text: cities[k].name, cssClass: cssClass[cities[k].country] })
+          }
+          else {
+            parMarks2.push({ text: cities[k].name, cssClass: 'error' })
+          }
           notFound = false;
           i += cities[k].name.length - 1;
         }
@@ -160,9 +170,9 @@ function inChange(e) {
   for (let i = 0; i < parMarks2.length; i++) {
     formated += '<span class="' + parMarks2[i].cssClass + '">' + parMarks2[i].text + '</span>';
   }
-  console.log('end' + plain);
+  // console.log('end' + plain);
   console.log(parMarks2);
-  console.log(formated);
+  // console.log(formated);
 
 
   input.innerHTML = formated;
