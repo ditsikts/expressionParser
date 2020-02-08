@@ -45,9 +45,11 @@ let previousPlain = '';
 let plain = '';
 
 function inChange(e) {
+
+
   plain = input.innerText;
-  if (plain === previousPlain) { return; }
-  previousPlain = plain;
+  // if (plain === previousPlain) { return; }
+  // previousPlain = plain;
   let caretPos = caret.getPos();
 
   lis.innerHTML = '';
@@ -55,9 +57,11 @@ function inChange(e) {
   // console.log('start' + plain);
   const [word, backWord] = wordAtCaret(plain, caretPos);
 
+  console.log(plain.charAt(backWord) === '(');
+
   if (plain.charAt(backWord) === '(') {
     if (word != '') {
-      let ac = cities.filter((f) => {
+      let ac = leftPart.cities.filter((f) => {
 
         return f.name.includes(word);
       })
@@ -86,7 +90,7 @@ function inChange(e) {
         i++;
       }
       i--;
-      parMarks2.push({ text: simiChars, cssClass: 'nostyle' })
+      parMarks2.push({ text: simiChars, cssClass: 'nostyle', type: 'whitespace' })
       simiChars = '';
     }
     else if (plain[i] === '(') {
@@ -96,7 +100,7 @@ function inChange(e) {
       else {
         depthIndex += 1;
       }
-      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex })
+      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'parentheses' })
     }
     else if (plain[i] === ')') {
       if (opening === true) {
@@ -105,44 +109,100 @@ function inChange(e) {
       else {
         depthIndex -= 1;
       }
-      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex })
+      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'parentheses' })
     }
     else if (plain[i] === 'O' && plain[i + 1] === 'R'
       && !isLetter(plain[i - 1]) && !isLetter(plain[i + 2])) {
 
-      parMarks2.push({ text: 'OR', cssClass: 'oper' })
+      parMarks2.push({ text: 'OR', cssClass: 'oper', type: 'operator' })
       i += 1;
     }
     else if (plain[i] === 'A' && plain[i + 1] === 'N' && plain[i + 2] === 'D'
       && !isLetter(plain[i - 1]) && !isLetter(plain[i + 3])) {
 
-      parMarks2.push({ text: 'AND', cssClass: 'oper' })
+      parMarks2.push({ text: 'AND', cssClass: 'oper', type: 'operator' })
       i += 2;
     }
     else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
 
-      let iOf = -1;
-      let k = 0;
-      let notFound = true;
-      while (notFound && k < cities.length) {
-        iOf = plain.indexOf(cities[k].name, i);
 
-        if (iOf === i) {
-          if ( parMarks2[parMarks2.length - 1].text === '('
-            || parMarks2[parMarks2.length - 2].cssClass === 'oper'
-            || (parMarks2[parMarks2.length - 2].text === '('
-              && parMarks2[parMarks2.length - 1].cssClass === 'nostyle')) {
-            parMarks2.push({ text: cities[k].name, cssClass: cssClass[cities[k].country] })
+
+      if (parMarks2[parMarks2.length - 1].text === '('
+        || parMarks2[parMarks2.length - 2].type === 'operator'
+        || (parMarks2[parMarks2.length - 2].text === '('
+          && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+        let notFound = true;
+        let iOf = -1;
+        let k = 0;
+
+        while (notFound && k < leftPart.cities.length) {
+          iOf = plain.indexOf(leftPart.cities[k].name, i);
+          if (iOf === i) {
+            parMarks2.push({ text: leftPart.cities[k].name, type: leftPart.cities[k].type, cssClass: cssClass[leftPart.cities[k].country] });
+            notFound = false;
+            i += leftPart.cities[k].name.length - 1;
           }
-          else {
-            parMarks2.push({ text: cities[k].name, cssClass: 'error' })
-          }
-          notFound = false;
-          i += cities[k].name.length - 1;
+          k += 1;
         }
-        k += 1;
+
+        if (notFound) {
+          const [word,] = wordAtCaret(plain, i);
+          parMarks2.push({ text: word, cssClass: 'error' });
+          i += word.length - 1;
+        }
       }
-      if (notFound) {
+      else if ((parMarks2[parMarks2.length - 2].type === 'city'
+        && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+        let notFound = true;
+        let iOf = -1;
+        let k = 0;
+
+        while (notFound && k < groups.buildings.operators.length) {
+          iOf = plain.indexOf(groups.buildings.operators[k], i);
+          if (iOf === i) {
+            parMarks2.push({ text: groups.buildings.operators[k], type: groups.buildings.type, cssClass: cssClass[groups.buildings.type] });
+            notFound = false;
+            i += groups.buildings.operators[k].length - 1;
+          }
+          k += 1;
+        }
+
+        if (notFound) {
+          const [word,] = wordAtCaret(plain, i);
+          parMarks2.push({ text: word, cssClass: 'error' });
+          i += word.length - 1;
+        }
+      }
+
+
+      else if ((parMarks2[parMarks2.length - 2].type === 'buildings'
+        && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+        let notFound = true;
+        let iOf = -1;
+        let k = 0;
+
+        while (notFound && k < groups.buildings.props.length) {
+          iOf = plain.indexOf(groups.buildings.props[k].name, i);
+          if (iOf === i) {
+            parMarks2.push({ text: groups.buildings.props[k].name, type: groups.buildings.props[k].type, cssClass: cssClass[groups.buildings.props[k].type] });
+            notFound = false;
+            i += groups.buildings.props[k].name.length - 1;
+          }
+          k += 1;
+        }
+
+        if (notFound) {
+          const [word,] = wordAtCaret(plain, i);
+          parMarks2.push({ text: word, cssClass: 'error' });
+          i += word.length - 1;
+        }
+      }
+
+
+      else {
         const [word,] = wordAtCaret(plain, i);
         parMarks2.push({ text: word, cssClass: 'error' });
         i += word.length - 1;
@@ -158,7 +218,7 @@ function inChange(e) {
 
   }
 
-  //normalize parMarks
+  //normalize parentheses
   // parMarks = [...parMarks].reduce((acc, curr) => {
   //   acc += (4 - curr);
   //   return acc;
@@ -187,52 +247,68 @@ function isLetter(c) {
 
 const groups = {
   buildings: {
-    oper: ['have', 'not_have'],
-    props: ['Stadium', 'Zoo', 'Casino']
+    type: 'buildings',
+    combined: 'city',
+    operators: ['contain', 'notContain'],
+    props: [
+      { name: 'Stadium', type: 'prop' },
+      { name: 'Zoo', type: 'prop' },
+      { name: 'Casino', type: 'prop' }
+    ]
   }
 }
 
 const cssClass = {
   Italy: 'italy',
   USA: 'usa',
-  France: 'france'
+  France: 'france',
+  buildings: 'buildings',
+  prop: 'prop'
 }
-const cities = [
-  {
-    "id": "1",
-    "name": "California",
-    "country": "USA"
-  },
-  {
-    "id": "2",
-    "name": "Seattle",
-    "country": "USA"
-  },
-  {
-    "id": "3",
-    "name": "NewYork",
-    "country": "USA"
-  },
-  {
-    "id": "4",
-    "name": "Venice",
-    "country": "Italy"
-  },
-  {
-    "id": "5",
-    "name": "Rome",
-    "country": "Italy"
-  },
+const leftPart = {
+  cities: [
+    {
+      "id": "1",
+      "name": "California",
+      "country": "USA",
+      "type": "city"
+    },
+    {
+      "id": "2",
+      "name": "Seattle",
+      "country": "USA",
+      "type": "city"
+    },
+    {
+      "id": "3",
+      "name": "NewYork",
+      "country": "USA",
+      "type": "city"
+    },
+    {
+      "id": "4",
+      "name": "Venice",
+      "country": "Italy",
+      "type": "city"
+    },
+    {
+      "id": "5",
+      "name": "Rome",
+      "country": "Italy",
+      "type": "city"
+    },
 
-  {
-    "id": "6",
-    "name": "Paris",
-    "country": "France"
-  },
-  {
-    "id": "7",
-    "name": "Lyon",
-    "country": "France"
-  },
-]
-
+    {
+      "id": "6",
+      "name": "Paris",
+      "country": "France",
+      "type": "city"
+    },
+    {
+      "id": "7",
+      "name": "Lyon",
+      "country": "France",
+      "type": "city"
+    },
+  ]
+}

@@ -6,10 +6,10 @@
   .input {
     border: 1px solid #aaa;
     margin: 10;
-    width: 900px;
+    width: 1200px;
     caret-color: black;
     ddisplay: flex;
-    fflex-wrap: wrap;
+    dflex-wrap: wrap;
   }
   .italy {
     border-color: darkkhaki;
@@ -46,6 +46,19 @@
 
   .par4 {
     color: orange;
+  }
+  .par5 {
+    color:lightseagreen
+  }
+
+  .buildings {
+    color:darkmagenta;
+  }
+  .prop {
+    border-color:olive;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 3px;
   }
   .error {
     border-bottom: 5px solid red;
