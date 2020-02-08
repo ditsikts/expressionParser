@@ -5,17 +5,17 @@ input.addEventListener('keyup', inChange);
 var caret = new VanillaCaret(input);
 
 
-const previousChar = (wordStartPos) => {
-  while (plain.charAt(wordStartPos) != null
-    && plain.charAt(wordStartPos) != undefined
-    && (plain.charCodeAt(wordStartPos) == 160
-      || plain.charCodeAt(wordStartPos) == 32)) {
+// const previousChar = (wordStartPos) => {
+//   while (plain.charAt(wordStartPos) != null
+//     && plain.charAt(wordStartPos) != undefined
+//     && (plain.charCodeAt(wordStartPos) == 160
+//       || plain.charCodeAt(wordStartPos) == 32)) {
 
-    wordStartPos -= 1;//keeps position of previous non space char
-  }
-  return wordStartPos;
-}
-const wordAtCaret = (plain, caretPos) => {
+//     wordStartPos -= 1;//keeps position of previous non space char
+//   }
+//   return wordStartPos;
+// }
+const wordAtIndex = (plain, caretPos) => {
 
   let word = '';
   let backWord = 1;
@@ -35,9 +35,9 @@ const wordAtCaret = (plain, caretPos) => {
     forWord += 1;
   }
   backWord = caretPos - backWord;
-  if (word.length > 0) {
-    backWord = previousChar(backWord);
-  }
+  // if (word.length > 0) {
+  //   backWord = previousChar(backWord);
+  // }
   return [word, backWord];
 }
 
@@ -55,23 +55,6 @@ function inChange(e) {
   lis.innerHTML = '';
 
   // console.log('start' + plain);
-  const [word, backWord] = wordAtCaret(plain, caretPos);
-
-  console.log(plain.charAt(backWord) === '(');
-
-  if (plain.charAt(backWord) === '(') {
-    if (word != '') {
-      let ac = leftPart.cities.filter((f) => {
-
-        return f.name.includes(word);
-      })
-      ac.forEach(f => {
-        let el = document.createElement('li');
-        el.innerText = f.name;
-        lis.appendChild(el);
-      })
-    }
-  }
 
   depthIndex = 0;
   opening = true;
@@ -100,7 +83,7 @@ function inChange(e) {
       else {
         depthIndex += 1;
       }
-      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'parentheses' })
+      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'openingParentheses' })
     }
     else if (plain[i] === ')') {
       if (opening === true) {
@@ -109,7 +92,7 @@ function inChange(e) {
       else {
         depthIndex -= 1;
       }
-      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'parentheses' })
+      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'closingParentheses' })
     }
     else if (plain[i] === 'O' && plain[i + 1] === 'R'
       && !isLetter(plain[i - 1]) && !isLetter(plain[i + 2])) {
@@ -124,8 +107,6 @@ function inChange(e) {
       i += 2;
     }
     else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
-
-
 
       if (parMarks2[parMarks2.length - 1].text === '('
         || parMarks2[parMarks2.length - 2].type === 'operator'
@@ -147,7 +128,7 @@ function inChange(e) {
         }
 
         if (notFound) {
-          const [word,] = wordAtCaret(plain, i);
+          const [word,] = wordAtIndex(plain, i);
           parMarks2.push({ text: word, cssClass: 'error' });
           i += word.length - 1;
         }
@@ -170,13 +151,11 @@ function inChange(e) {
         }
 
         if (notFound) {
-          const [word,] = wordAtCaret(plain, i);
+          const [word,] = wordAtIndex(plain, i);
           parMarks2.push({ text: word, cssClass: 'error' });
           i += word.length - 1;
         }
       }
-
-
       else if ((parMarks2[parMarks2.length - 2].type === 'buildings'
         && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
 
@@ -193,17 +172,14 @@ function inChange(e) {
           }
           k += 1;
         }
-
         if (notFound) {
-          const [word,] = wordAtCaret(plain, i);
+          const [word,] = wordAtIndex(plain, i);
           parMarks2.push({ text: word, cssClass: 'error' });
           i += word.length - 1;
         }
       }
-
-
       else {
-        const [word,] = wordAtCaret(plain, i);
+        const [word,] = wordAtIndex(plain, i);
         parMarks2.push({ text: word, cssClass: 'error' });
         i += word.length - 1;
       }
@@ -217,6 +193,63 @@ function inChange(e) {
     }
 
   }
+
+  const [word,] = wordAtIndex(plain, caretPos);
+
+  // let elementAtCaret = parMarks2.reduce(
+  //   (acc, cur, idx) => {
+  //     let curLength =cur.text.length;
+  //     if(cur.text.includes('&nbsp;')){
+  //       curLength = (cur.text.match(/&nbsp;/g)).length;
+  //     }
+  //     if (acc < curLength) {
+
+  //       return acc;
+
+  //     }
+  //     return acc -= curLength;
+  //   }, caretPos);
+
+  // console.log(elementAtCaret);
+
+  if (word != '') {
+    let caretPosTemp = caretPos;
+    let curLength = 0;
+    let idx = 0;
+    while (caretPosTemp > curLength) {
+      curLength = parMarks2[idx].text.length;
+      if (parMarks2[idx].text.includes('&nbsp;')) {
+        curLength = (parMarks2[idx].text.match(/&nbsp;/g)).length;
+      }
+      if (caretPosTemp < curLength) {
+        break
+      }
+      caretPosTemp -= curLength;
+      idx += 1;
+    }
+    console.log("idx :" + idx + " caretPosTemp :" + caretPosTemp);
+    if (caretPosTemp === 0) { idx--; }
+    if (parMarks2[idx - 1].text === '('
+      || parMarks2[idx - 2].type === 'operator'
+      || (parMarks2[idx - 2].text === '('
+        && parMarks2[idx - 1].type === 'whitespace')) {
+
+
+      let ac = leftPart.cities.filter((f) => {
+
+        return f.name.includes(word);
+      })
+      ac.forEach(f => {
+        let el = document.createElement('li');
+        el.innerText = f.name;
+        lis.appendChild(el);
+      })
+    }
+
+
+
+  }
+
 
   //normalize parentheses
   // parMarks = [...parMarks].reduce((acc, curr) => {
@@ -244,6 +277,10 @@ function inChange(e) {
 function isLetter(c) {
   return c.toLowerCase() != c.toUpperCase();
 }
+
+// const dropdowns = [
+//   {previousType:'openingParentheses', },{}
+// ]
 
 const groups = {
   buildings: {
