@@ -184,7 +184,8 @@ const groups = {
 
 const cssClass = {
   Italy: 'italy',
-  USA: 'usa'
+  USA: 'usa',
+  France: 'france'
 }
 const cities = [
   {
@@ -212,35 +213,16 @@ const cities = [
     "name": "Rome",
     "country": "Italy"
   },
+
   {
     "id": "6",
-    "name": "Tokyo",
-    "country": "Japan"
-  },
-  {
-    "id": "7",
-    "name": "Moscow",
-    "country": "Russia"
-  },
-  {
-    "id": "8",
-    "name": "Madrid",
-    "country": "Spain"
-  },
-  {
-    "id": "9",
-    "name": "Athens",
-    "country": "Greece"
-  },
-  {
-    "id": "10",
     "name": "Paris",
     "country": "France"
   },
   {
-    "id": "11",
-    "name": "London",
-    "country": "GB"
+    "id": "7",
+    "name": "Lyon",
+    "country": "France"
   },
 ]
 

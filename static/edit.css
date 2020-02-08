@@ -17,6 +17,12 @@
     border-style: solid;
     border-width: 3px;
   }
+  .france {
+    border-color:steelblue;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 3px;
+  }
   .usa {
     border-color: palevioletred;
     border-radius: 10px;
