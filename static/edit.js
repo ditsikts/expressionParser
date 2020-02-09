@@ -44,6 +44,10 @@ let plain = '';
 
 function inChange(e) {
 
+  // if(e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40){
+  //   console.log('arrowpressed');
+  //   return;
+  // }
 
   plain = input.innerText;
   // if (plain === previousPlain) { return; }
@@ -136,18 +140,25 @@ function inChange(e) {
 
         let notFound = true;
         let iOf = -1;
-        let k = 0;
 
-        while (notFound && k < groups.buildings.operators.length) {
-          iOf = plain.indexOf(groups.buildings.operators[k], i);
-          if (iOf === i) {
-            parMarks2.push({ text: groups.buildings.operators[k], type: groups.buildings.type, cssClass: cssClass[groups.buildings.type] });
-            notFound = false;
-            i += groups.buildings.operators[k].length - 1;
+        const combinedCity = groups.filter(g =>
+          g.combined === 'city'
+        )
+        let outerK = 0;
+        while (notFound && outerK < combinedCity.length) {
+          let k = 0;
+
+          while (notFound && k < combinedCity[outerK].operators.length) {
+            iOf = plain.indexOf(combinedCity[outerK].operators[k], i);
+            if (iOf === i) {
+              parMarks2.push({ text: combinedCity[outerK].operators[k], type: combinedCity[outerK].type, cssClass: cssClass[combinedCity[outerK].type] });
+              notFound = false;
+              i += combinedCity[outerK].operators[k].length - 1;
+            }
+            k += 1;
           }
-          k += 1;
+          outerK += 1;
         }
-
         if (notFound) {
           const [word,] = wordAtIndex(plain, i);
           parMarks2.push({ text: word, cssClass: 'error' });
@@ -161,12 +172,34 @@ function inChange(e) {
         let iOf = -1;
         let k = 0;
 
-        while (notFound && k < groups.buildings.props.length) {
-          iOf = plain.indexOf(groups.buildings.props[k].name, i);
+        while (notFound && k < groups[0].props.length) {
+          iOf = plain.indexOf(groups[0].props[k].name, i);
           if (iOf === i) {
-            parMarks2.push({ text: groups.buildings.props[k].name, type: groups.buildings.props[k].type, cssClass: cssClass[groups.buildings.props[k].type] });
+            parMarks2.push({ text: groups[0].props[k].name, type: groups[0].props[k].type, cssClass: cssClass[groups[0].props[k].type] });
             notFound = false;
-            i += groups.buildings.props[k].name.length - 1;
+            i += groups[0].props[k].name.length - 1;
+          }
+          k += 1;
+        }
+        if (notFound) {
+          const [word,] = wordAtIndex(plain, i);
+          parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
+          i += word.length - 1;
+        }
+      }
+      else if ((parMarks2[parMarks2.length - 2].type === 'states'
+        && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+        let notFound = true;
+        let iOf = -1;
+        let k = 0;
+
+        while (notFound && k < groups[1].props.length) {
+          iOf = plain.indexOf(groups[1].props[k].name, i);
+          if (iOf === i) {
+            parMarks2.push({ text: groups[1].props[k].name, type: groups[1].props[k].type, cssClass: cssClass[groups[1].props[k].type] });
+            notFound = false;
+            i += groups[1].props[k].name.length - 1;
           }
           k += 1;
         }
@@ -236,8 +269,17 @@ function inChange(e) {
     }
     else if (parMarks2[idx - 2].type === 'city'
       && parMarks2[idx - 1].type === 'whitespace') {
-        
-      groups.buildings.operators.forEach(f => {
+
+      const combinedCityOper = groups.filter(g =>
+        g.combined === 'city'
+      ).reduce((acc, cur) => {
+        if (acc) {
+          return acc.concat(cur.operators);
+        }
+        return cur.operators;
+      }, [])
+      // console.log(combinedCity);
+      combinedCityOper.forEach(f => {
         let el = document.createElement('li');
         el.innerText = f;
         lis.appendChild(el);
@@ -245,14 +287,22 @@ function inChange(e) {
     }
     else if (parMarks2[idx - 2].type === 'buildings'
       && parMarks2[idx - 1].type === 'whitespace') {
-        
-      groups.buildings.props.forEach(f => {
+
+      groups[0].props.forEach(f => {
         let el = document.createElement('li');
         el.innerText = f.name;
         lis.appendChild(el);
       })
     }
+    else if (parMarks2[idx - 2].type === 'states'
+    && parMarks2[idx - 1].type === 'whitespace') {
 
+    groups[1].props.forEach(f => {
+      let el = document.createElement('li');
+      el.innerText = f.name;
+      lis.appendChild(el);
+    })
+  }
 
   }
 
@@ -269,15 +319,14 @@ function inChange(e) {
   for (let i = 0; i < parMarks2.length; i++) {
     formated += '<span class="' + parMarks2[i].cssClass + '">' + parMarks2[i].text + '</span>';
   }
-  // console.log('end' + plain);
-  // console.log(parMarks2);
+  
+  console.log(parMarks2.length);
   // console.log(formated);
 
 
   input.innerHTML = formated;
 
   caret.setPos(caretPos);
-  // console.log(groups.buildings.oper[0]);
 
 }
 function isLetter(c) {
@@ -288,8 +337,8 @@ function isLetter(c) {
 //   {previousType:'openingParentheses', },{}
 // ]
 
-const groups = {
-  buildings: {
+const groups = [
+  {
     type: 'buildings',
     combined: 'city',
     operators: ['contain', 'notContain'],
@@ -298,14 +347,25 @@ const groups = {
       { name: 'Zoo', type: 'prop' },
       { name: 'Casino', type: 'prop' }
     ]
+  },
+  {
+    type: 'states',
+    combined: 'city',
+    operators: ['is', 'notIs'],
+    props: [
+      { name: 'Polluted', type: 'prop' },
+      { name: 'Overpopulated', type: 'prop' },
+      { name: 'Rich', type: 'prop' }
+    ]
   }
-}
+]
 
 const cssClass = {
   Italy: 'italy',
   USA: 'usa',
   France: 'france',
   buildings: 'buildings',
+  states: 'states',
   prop: 'prop'
 }
 const leftPart = {
