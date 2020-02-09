@@ -40,7 +40,7 @@ const wordAtIndex = (plain, caretPos) => {
 }
 
 let previousPlain = '';
-let plain = '';
+// let plain = '';
 
 function inChange(e) {
 
@@ -49,7 +49,7 @@ function inChange(e) {
   //   return;
   // }
 
-  plain = input.innerText;
+  const plain = input.innerText;
   // if (plain === previousPlain) { return; }
   // previousPlain = plain;
   let caretPos = caret.getPos();
