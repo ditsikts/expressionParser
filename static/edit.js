@@ -172,19 +172,19 @@ function inChange(e) {
         }
         if (notFound) {
           const [word,] = wordAtIndex(plain, i);
-          parMarks2.push({ text: word, cssClass: 'error' });
+          parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
           i += word.length - 1;
         }
       }
       else {
         const [word,] = wordAtIndex(plain, i);
-        parMarks2.push({ text: word, cssClass: 'error' });
+        parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
         i += word.length - 1;
       }
 
     }
     else {
-      parMarks2.push({ text: plain[i], cssClass: 'error' })
+      parMarks2.push({ text: plain[i], cssClass: 'error', type: 'error' })
       console.log('#' + plain[i] + '#');
       // console.log('charcode #' + plain.charCodeAt(i) + '#');
 
@@ -214,21 +214,18 @@ function inChange(e) {
       idx += 1;
     }
     console.log("idx :" + idx + " caretPosTemp :" + caretPosTemp + " caretPos :" + caretPos + " forWord :" + forWord + " backWord :" + backWord + " word :" + word);
-    // if (forWord === 0) { idx--; }
-    console.log('idx   :' + parMarks2[idx].text);
-    console.log('idx-1 :' + parMarks2[idx - 1].text);
-    console.log('idx-2 :' + parMarks2[idx - 2].text);
-    if (backWord === 0) {
-    }
-    if (parMarks2[idx-1].text === '('
-      // || parMarks2[idx - 2].type === 'operator'
+
+    // console.log('idx   :' + parMarks2[idx].text);
+    // console.log('idx-1 :' + parMarks2[idx - 1].text);
+    // console.log('idx-2 :' + parMarks2[idx - 2].text);
+    if (forWord === 0) { idx--; }
+    if (parMarks2[idx - 1].text === '('
+      || (parMarks2[idx - 2].type === 'operator'
+        && parMarks2[idx - 1].type === 'whitespace')
       || (parMarks2[idx - 2].text === '('
-        && parMarks2[idx-1].type === 'whitespace')
+        && parMarks2[idx - 1].type === 'whitespace')
     ) {
-
-
       let ac = leftPart.cities.filter((f) => {
-
         return f.name.includes(word);
       })
       ac.forEach(f => {
@@ -237,8 +234,24 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
-
-
+    else if (parMarks2[idx - 2].type === 'city'
+      && parMarks2[idx - 1].type === 'whitespace') {
+        
+      groups.buildings.operators.forEach(f => {
+        let el = document.createElement('li');
+        el.innerText = f;
+        lis.appendChild(el);
+      })
+    }
+    else if (parMarks2[idx - 2].type === 'buildings'
+      && parMarks2[idx - 1].type === 'whitespace') {
+        
+      groups.buildings.props.forEach(f => {
+        let el = document.createElement('li');
+        el.innerText = f.name;
+        lis.appendChild(el);
+      })
+    }
 
 
   }
@@ -299,13 +312,13 @@ const leftPart = {
   cities: [
     {
       "id": "1",
-      "name": "California",
+      "name": "Phoenix",
       "country": "USA",
       "type": "city"
     },
     {
       "id": "2",
-      "name": "Seattle",
+      "name": "Florida",
       "country": "USA",
       "type": "city"
     },
@@ -317,13 +330,13 @@ const leftPart = {
     },
     {
       "id": "4",
-      "name": "Venice",
+      "name": "Parma",
       "country": "Italy",
       "type": "city"
     },
     {
       "id": "5",
-      "name": "Rome",
+      "name": "Naples",
       "country": "Italy",
       "type": "city"
     },
@@ -336,7 +349,7 @@ const leftPart = {
     },
     {
       "id": "7",
-      "name": "Lyon",
+      "name": "Nice",
       "country": "France",
       "type": "city"
     },
