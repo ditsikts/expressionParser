@@ -49,6 +49,17 @@ function inChange(e) {
   //   return;
   // }
 
+  // elem = input.children[1];
+  // if (elem) {
+  //   elem.innerText += 'KO';
+  // }
+  console.log(input.childNodes);
+
+  if (input.childNodes[3].nodeType == Node.TEXT_NODE)console.log('found text');
+  
+
+return;
+
   const plain = input.innerText;
   // if (plain === previousPlain) { return; }
   // previousPlain = plain;
@@ -295,14 +306,14 @@ function inChange(e) {
       })
     }
     else if (parMarks2[idx - 2].type === 'states'
-    && parMarks2[idx - 1].type === 'whitespace') {
+      && parMarks2[idx - 1].type === 'whitespace') {
 
-    groups[1].props.forEach(f => {
-      let el = document.createElement('li');
-      el.innerText = f.name;
-      lis.appendChild(el);
-    })
-  }
+      groups[1].props.forEach(f => {
+        let el = document.createElement('li');
+        el.innerText = f.name;
+        lis.appendChild(el);
+      })
+    }
 
   }
 
@@ -319,7 +330,7 @@ function inChange(e) {
   for (let i = 0; i < parMarks2.length; i++) {
     formated += '<span class="' + parMarks2[i].cssClass + '">' + parMarks2[i].text + '</span>';
   }
-  
+
   console.log(parMarks2.length);
   // console.log(formated);
 
