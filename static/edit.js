@@ -53,16 +53,30 @@ function inChange(e) {
   // if (elem) {
   //   elem.innerText += 'KO';
   // }
-  console.log(input.childNodes);
+  // console.log(input.childNodes);
 
-  if (input.childNodes[3].nodeType == Node.TEXT_NODE)console.log('found text');
-  
+  // if (input.childNodes[3].nodeType == Node.TEXT_NODE)console.log('found text');
 
-return;
 
   const plain = input.innerText;
-  // if (plain === previousPlain) { return; }
-  // previousPlain = plain;
+
+
+  // let parMarks3 =plain.split(/([\s+|\W])/)
+  let parMarks3 =plain.split(/(\s+|\w+|\(|\))/)
+  let plainIndex = 0;
+  parMarks3 = parMarks3.filter(item=>
+    item.length>0
+  )
+  console.log(parMarks3)
+  // console.log(  plain.split(/(\s+)/)  );
+
+
+
+
+
+  return;
+
+
   let caretPos = caret.getPos();
 
   lis.innerHTML = '';
