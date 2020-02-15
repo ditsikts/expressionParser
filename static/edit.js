@@ -58,197 +58,226 @@ function inChange(e) {
   // if (input.childNodes[3].nodeType == Node.TEXT_NODE)console.log('found text');
 
 
-  const plain = input.innerText;
-
-
-  // let parMarks3 =plain.split(/([\s+|\W])/)
-  let parMarks3 =plain.split(/(\s+|\w+|\(|\))/)
-  let plainIndex = 0;
-  parMarks3 = parMarks3.filter(item=>
-    item.length>0
-  )
-  console.log(parMarks3)
-  // console.log(  plain.split(/(\s+)/)  );
-
-
-
-
-
-  return;
-
-
   let caretPos = caret.getPos();
 
   lis.innerHTML = '';
+  const plain = input.innerText;
+  // console.log(plain);
+  
+  const plainArray = input.innerText.split(/(\s+|\w+|\(|\))/).filter(item => item.length > 0);
 
-  // console.log('start' + plain);
 
   depthIndex = 0;
   opening = true;
 
-  let parMarks2 = [];
+  let parMarks3 = [];
   let simiChars = '';
-
-  for (let i = 0; i < plain.length; i++) {
-
-    if (plain.charCodeAt(i) === 160
-      || plain.charCodeAt(i) === 32) {
-      simiChars += '&nbsp;';
-      i++;
-      while (plain.charCodeAt(i) === 160 || plain.charCodeAt(i) === 32) {
-        simiChars += '&nbsp;';
-        i++;
-      }
-      i--;
-      parMarks2.push({ text: simiChars, cssClass: 'nostyle', type: 'whitespace' })
-      simiChars = '';
+  for (let i = 0; i < plainArray.length; i++) {
+    if (plainArray[i].charCodeAt(0) === 160 || plainArray[i].charCodeAt(0) === 32) {
+      parMarks3.push({ text: plainArray[i].replace(/ /g, '&nbsp;'), cssClass: 'nostyle', type: 'whitespace' })
     }
-    else if (plain[i] === '(') {
+    else if (plainArray[i] === '(') {
       if (opening === false) {
         opening = true;
       }
       else {
         depthIndex += 1;
       }
-      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'openingParentheses' })
+      parMarks3.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'openingParentheses' })
     }
-    else if (plain[i] === ')') {
+    else if (plainArray[i] === ')') {
       if (opening === true) {
         opening = false;
       }
       else {
         depthIndex -= 1;
       }
-      parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'closingParentheses' })
+      parMarks3.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'closingParentheses' })
     }
-    else if (plain[i] === 'O' && plain[i + 1] === 'R'
-      && !isLetter(plain[i - 1]) && !isLetter(plain[i + 2])) {
-
-      parMarks2.push({ text: 'OR', cssClass: 'oper', type: 'operator' })
-      i += 1;
-    }
-    else if (plain[i] === 'A' && plain[i + 1] === 'N' && plain[i + 2] === 'D'
-      && !isLetter(plain[i - 1]) && !isLetter(plain[i + 3])) {
-
-      parMarks2.push({ text: 'AND', cssClass: 'oper', type: 'operator' })
-      i += 2;
-    }
-    else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
-
-      if (parMarks2[parMarks2.length - 1].text === '('
-        || parMarks2[parMarks2.length - 2].type === 'operator'
-        || (parMarks2[parMarks2.length - 2].text === '('
-          && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
-
-        let notFound = true;
-        let iOf = -1;
-        let k = 0;
-
-        while (notFound && k < leftPart.cities.length) {
-          iOf = plain.indexOf(leftPart.cities[k].name, i);
-          if (iOf === i) {
-            parMarks2.push({ text: leftPart.cities[k].name, type: leftPart.cities[k].type, cssClass: cssClass[leftPart.cities[k].country] });
-            notFound = false;
-            i += leftPart.cities[k].name.length - 1;
-          }
-          k += 1;
-        }
-
-        if (notFound) {
-          const [word,] = wordAtIndex(plain, i);
-          parMarks2.push({ text: word, cssClass: 'error' });
-          i += word.length - 1;
-        }
-      }
-      else if ((parMarks2[parMarks2.length - 2].type === 'city'
-        && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
-
-        let notFound = true;
-        let iOf = -1;
-
-        const combinedCity = groups.filter(g =>
-          g.combined === 'city'
-        )
-        let outerK = 0;
-        while (notFound && outerK < combinedCity.length) {
-          let k = 0;
-
-          while (notFound && k < combinedCity[outerK].operators.length) {
-            iOf = plain.indexOf(combinedCity[outerK].operators[k], i);
-            if (iOf === i) {
-              parMarks2.push({ text: combinedCity[outerK].operators[k], type: combinedCity[outerK].type, cssClass: cssClass[combinedCity[outerK].type] });
-              notFound = false;
-              i += combinedCity[outerK].operators[k].length - 1;
-            }
-            k += 1;
-          }
-          outerK += 1;
-        }
-        if (notFound) {
-          const [word,] = wordAtIndex(plain, i);
-          parMarks2.push({ text: word, cssClass: 'error' });
-          i += word.length - 1;
-        }
-      }
-      else if ((parMarks2[parMarks2.length - 2].type === 'buildings'
-        && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
-
-        let notFound = true;
-        let iOf = -1;
-        let k = 0;
-
-        while (notFound && k < groups[0].props.length) {
-          iOf = plain.indexOf(groups[0].props[k].name, i);
-          if (iOf === i) {
-            parMarks2.push({ text: groups[0].props[k].name, type: groups[0].props[k].type, cssClass: cssClass[groups[0].props[k].type] });
-            notFound = false;
-            i += groups[0].props[k].name.length - 1;
-          }
-          k += 1;
-        }
-        if (notFound) {
-          const [word,] = wordAtIndex(plain, i);
-          parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
-          i += word.length - 1;
-        }
-      }
-      else if ((parMarks2[parMarks2.length - 2].type === 'states'
-        && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
-
-        let notFound = true;
-        let iOf = -1;
-        let k = 0;
-
-        while (notFound && k < groups[1].props.length) {
-          iOf = plain.indexOf(groups[1].props[k].name, i);
-          if (iOf === i) {
-            parMarks2.push({ text: groups[1].props[k].name, type: groups[1].props[k].type, cssClass: cssClass[groups[1].props[k].type] });
-            notFound = false;
-            i += groups[1].props[k].name.length - 1;
-          }
-          k += 1;
-        }
-        if (notFound) {
-          const [word,] = wordAtIndex(plain, i);
-          parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
-          i += word.length - 1;
-        }
-      }
-      else {
-        const [word,] = wordAtIndex(plain, i);
-        parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
-        i += word.length - 1;
-      }
-
+    else if (plainArray[i].toUpperCase === 'AND' || plainArray[i].toUpperCase === 'OR') {
+      parMarks3.push({ text: plainArray[i].toUpperCase, cssClass: 'oper', type: 'operator' })
     }
     else {
-      parMarks2.push({ text: plain[i], cssClass: 'error', type: 'error' })
-      console.log('#' + plain[i] + '#');
-      // console.log('charcode #' + plain.charCodeAt(i) + '#');
-
+      parMarks3.push({ text: plainArray[i], cssClass: 'error', type: 'error' })
     }
-
   }
+
+
+  // return;
+
+
+  // let caretPos = caret.getPos();
+
+  // lis.innerHTML = '';
+
+  // // console.log('start' + plain);
+
+  // depthIndex = 0;
+  // opening = true;
+
+  // let parMarks2 = [];
+  // let simiChars = '';
+
+  // for (let i = 0; i < plain.length; i++) {
+
+  //   if (plain.charCodeAt(i) === 160
+  //     || plain.charCodeAt(i) === 32) {
+  //     simiChars += '&nbsp;';
+  //     i++;
+  //     while (plain.charCodeAt(i) === 160 || plain.charCodeAt(i) === 32) {
+  //       simiChars += '&nbsp;';
+  //       i++;
+  //     }
+  //     i--;
+  //     parMarks2.push({ text: simiChars, cssClass: 'nostyle', type: 'whitespace' })
+  //     simiChars = '';
+  //   }
+  //   else if (plain[i] === '(') {
+  //     if (opening === false) {
+  //       opening = true;
+  //     }
+  //     else {
+  //       depthIndex += 1;
+  //     }
+  //     parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'openingParentheses' })
+  //   }
+  //   else if (plain[i] === ')') {
+  //     if (opening === true) {
+  //       opening = false;
+  //     }
+  //     else {
+  //       depthIndex -= 1;
+  //     }
+  //     parMarks2.push({ text: plain[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'closingParentheses' })
+  //   }
+  //   else if (plain[i] === 'O' && plain[i + 1] === 'R'
+  //     && !isLetter(plain[i - 1]) && !isLetter(plain[i + 2])) {
+
+  //     parMarks2.push({ text: 'OR', cssClass: 'oper', type: 'operator' })
+  //     i += 1;
+  //   }
+  //   else if (plain[i] === 'A' && plain[i + 1] === 'N' && plain[i + 2] === 'D'
+  //     && !isLetter(plain[i - 1]) && !isLetter(plain[i + 3])) {
+
+  //     parMarks2.push({ text: 'AND', cssClass: 'oper', type: 'operator' })
+  //     i += 2;
+  //   }
+  //   else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
+
+  //     if (parMarks2[parMarks2.length - 1].text === '('
+  //       || parMarks2[parMarks2.length - 2].type === 'operator'
+  //       || (parMarks2[parMarks2.length - 2].text === '('
+  //         && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+  //       let notFound = true;
+  //       let iOf = -1;
+  //       let k = 0;
+
+  //       while (notFound && k < leftPart.cities.length) {
+  //         iOf = plain.indexOf(leftPart.cities[k].name, i);
+  //         if (iOf === i) {
+  //           parMarks2.push({ text: leftPart.cities[k].name, type: leftPart.cities[k].type, cssClass: cssClass[leftPart.cities[k].country] });
+  //           notFound = false;
+  //           i += leftPart.cities[k].name.length - 1;
+  //         }
+  //         k += 1;
+  //       }
+
+  //       if (notFound) {
+  //         const [word,] = wordAtIndex(plain, i);
+  //         parMarks2.push({ text: word, cssClass: 'error' });
+  //         i += word.length - 1;
+  //       }
+  //     }
+  //     else if ((parMarks2[parMarks2.length - 2].type === 'city'
+  //       && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+  //       let notFound = true;
+  //       let iOf = -1;
+
+  //       const combinedCity = groups.filter(g =>
+  //         g.combined === 'city'
+  //       )
+  //       let outerK = 0;
+  //       while (notFound && outerK < combinedCity.length) {
+  //         let k = 0;
+
+  //         while (notFound && k < combinedCity[outerK].operators.length) {
+  //           iOf = plain.indexOf(combinedCity[outerK].operators[k], i);
+  //           if (iOf === i) {
+  //             parMarks2.push({ text: combinedCity[outerK].operators[k], type: combinedCity[outerK].type, cssClass: cssClass[combinedCity[outerK].type] });
+  //             notFound = false;
+  //             i += combinedCity[outerK].operators[k].length - 1;
+  //           }
+  //           k += 1;
+  //         }
+  //         outerK += 1;
+  //       }
+  //       if (notFound) {
+  //         const [word,] = wordAtIndex(plain, i);
+  //         parMarks2.push({ text: word, cssClass: 'error' });
+  //         i += word.length - 1;
+  //       }
+  //     }
+  //     else if ((parMarks2[parMarks2.length - 2].type === 'buildings'
+  //       && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+  //       let notFound = true;
+  //       let iOf = -1;
+  //       let k = 0;
+
+  //       while (notFound && k < groups[0].props.length) {
+  //         iOf = plain.indexOf(groups[0].props[k].name, i);
+  //         if (iOf === i) {
+  //           parMarks2.push({ text: groups[0].props[k].name, type: groups[0].props[k].type, cssClass: cssClass[groups[0].props[k].type] });
+  //           notFound = false;
+  //           i += groups[0].props[k].name.length - 1;
+  //         }
+  //         k += 1;
+  //       }
+  //       if (notFound) {
+  //         const [word,] = wordAtIndex(plain, i);
+  //         parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
+  //         i += word.length - 1;
+  //       }
+  //     }
+  //     else if ((parMarks2[parMarks2.length - 2].type === 'states'
+  //       && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
+
+  //       let notFound = true;
+  //       let iOf = -1;
+  //       let k = 0;
+
+  //       while (notFound && k < groups[1].props.length) {
+  //         iOf = plain.indexOf(groups[1].props[k].name, i);
+  //         if (iOf === i) {
+  //           parMarks2.push({ text: groups[1].props[k].name, type: groups[1].props[k].type, cssClass: cssClass[groups[1].props[k].type] });
+  //           notFound = false;
+  //           i += groups[1].props[k].name.length - 1;
+  //         }
+  //         k += 1;
+  //       }
+  //       if (notFound) {
+  //         const [word,] = wordAtIndex(plain, i);
+  //         parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
+  //         i += word.length - 1;
+  //       }
+  //     }
+  //     else {
+  //       const [word,] = wordAtIndex(plain, i);
+  //       parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
+  //       i += word.length - 1;
+  //     }
+
+  //   }
+  //   else {
+  //     parMarks2.push({ text: plain[i], cssClass: 'error', type: 'error' })
+  //     console.log('#' + plain[i] + '#');
+  //     // console.log('charcode #' + plain.charCodeAt(i) + '#');
+
+  //   }
+
+  // }
 
   const [word, forWord, backWord] = wordAtIndex(plain, caretPos);
 
@@ -258,9 +287,9 @@ function inChange(e) {
     let curLength = 0;
     let idx = 0;
     while (caretPosTemp > curLength) {
-      curLength = parMarks2[idx].text.length;
-      if (parMarks2[idx].text.includes('&nbsp;')) {
-        curLength = parMarks2[idx].text.length / 6;
+      curLength = parMarks3[idx].text.length;
+      if (parMarks3[idx].text.includes('&nbsp;')) {
+        curLength = parMarks3[idx].text.length / 6;
         console.log(curLength);
 
       }
@@ -277,11 +306,11 @@ function inChange(e) {
     // console.log('idx-1 :' + parMarks2[idx - 1].text);
     // console.log('idx-2 :' + parMarks2[idx - 2].text);
     if (forWord === 0) { idx--; }
-    if (parMarks2[idx - 1].text === '('
-      || (parMarks2[idx - 2].type === 'operator'
-        && parMarks2[idx - 1].type === 'whitespace')
-      || (parMarks2[idx - 2].text === '('
-        && parMarks2[idx - 1].type === 'whitespace')
+    if (parMarks3[idx - 1].text === '('
+      || (parMarks3[idx - 2].type === 'operator'
+        && parMarks3[idx - 1].type === 'whitespace')
+      || (parMarks3[idx - 2].text === '('
+        && parMarks3[idx - 1].type === 'whitespace')
     ) {
       let ac = leftPart.cities.filter((f) => {
         return f.name.includes(word);
@@ -292,8 +321,8 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
-    else if (parMarks2[idx - 2].type === 'city'
-      && parMarks2[idx - 1].type === 'whitespace') {
+    else if (parMarks3[idx - 2].type === 'city'
+      && parMarks3[idx - 1].type === 'whitespace') {
 
       const combinedCityOper = groups.filter(g =>
         g.combined === 'city'
@@ -310,7 +339,7 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
-    else if (parMarks2[idx - 2].type === 'buildings'
+    else if (parMarks3[idx - 2].type === 'buildings'
       && parMarks2[idx - 1].type === 'whitespace') {
 
       groups[0].props.forEach(f => {
@@ -319,8 +348,8 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
-    else if (parMarks2[idx - 2].type === 'states'
-      && parMarks2[idx - 1].type === 'whitespace') {
+    else if (parMarks3[idx - 2].type === 'states'
+      && parMarks3[idx - 1].type === 'whitespace') {
 
       groups[1].props.forEach(f => {
         let el = document.createElement('li');
@@ -341,11 +370,11 @@ function inChange(e) {
   input.innerHTML = '';
   let formated = '';
 
-  for (let i = 0; i < parMarks2.length; i++) {
-    formated += '<span class="' + parMarks2[i].cssClass + '">' + parMarks2[i].text + '</span>';
+  for (let i = 0; i < parMarks3.length; i++) {
+    formated += '<span class="' + parMarks3[i].cssClass + '">' + parMarks3[i].text + '</span>';
   }
 
-  console.log(parMarks2.length);
+  console.log(parMarks3);
   // console.log(formated);
 
 
