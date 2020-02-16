@@ -117,13 +117,38 @@ function inChange(e) {
       parMarks3.push({ text: plainArray[i].toUpperCase(), cssClass: 'oper', type: 'operator' })
     }
     else if (isWord(plainArray[i])) {
-      if (checkPreviousTypeWithSpace(i, 'openingParentheses')) {
+      if (i === 0 || ((i - 1) === 0 && parMarks3[0].type)
+        || parMarks3[i - 1].type === 'openingParentheses'
+        || checkPreviousTypeWithSpace(i, 'openingParentheses')
+        || checkPreviousTypeWithSpace(i, 'operator')) {
         let found = leftParam[0].props.find(prop => prop.name === plainArray[i]);
         if (found) {
           parMarks3.push({ text: found.name, type: leftParam[0].type, cssClass: cssClass[found.country] });
         }
         else {
 
+          parMarks3.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
+        }
+      }
+      else if (checkPreviousTypeWithSpace(i, 'city')) {
+        const hasLeftCity = groups.filter(g =>
+          g.hasLeft === 'city'
+        );
+        let notFound = true;
+
+        index = 0;
+        while (index < hasLeftCity.length && notFound) {
+          opIndex = 0;
+          while (opIndex < hasLeftCity[index].operators.length && notFound) {
+            if (hasLeftCity[index].operators[opIndex] === plainArray[i]) {
+              parMarks3.push({ text: plainArray[i], type: hasLeftCity[index].type, cssClass: hasLeftCity[index].type })
+              notFound = false
+            }
+            opIndex += 1;
+          }
+          index += 1;
+        }
+        if (notFound) {
           parMarks3.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
@@ -144,36 +169,6 @@ function inChange(e) {
 
   //   else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
 
-  //     else if ((parMarks2[parMarks2.length - 2].type === 'city'
-  //       && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
-
-  //       let notFound = true;
-  //       let iOf = -1;
-
-  //       const combinedCity = groups.filter(g =>
-  //         g.combined === 'city'
-  //       )
-  //       let outerK = 0;
-  //       while (notFound && outerK < combinedCity.length) {
-  //         let k = 0;
-
-  //         while (notFound && k < combinedCity[outerK].operators.length) {
-  //           iOf = plain.indexOf(combinedCity[outerK].operators[k], i);
-  //           if (iOf === i) {
-  //             parMarks2.push({ text: combinedCity[outerK].operators[k], type: combinedCity[outerK].type, cssClass: cssClass[combinedCity[outerK].type] });
-  //             notFound = false;
-  //             i += combinedCity[outerK].operators[k].length - 1;
-  //           }
-  //           k += 1;
-  //         }
-  //         outerK += 1;
-  //       }
-  //       if (notFound) {
-  //         const [word,] = wordAtIndex(plain, i);
-  //         parMarks2.push({ text: word, cssClass: 'error' });
-  //         i += word.length - 1;
-  //       }
-  //     }
   //     else if ((parMarks2[parMarks2.length - 2].type === 'buildings'
   //       && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
 
@@ -261,7 +256,8 @@ function inChange(e) {
     // console.log('idx-1 :' + parMarks2[idx - 1].text);
     // console.log('idx-2 :' + parMarks2[idx - 2].text);
     if (forWord === 0) { idx--; }
-    if (parMarks3[idx - 1].text === '('
+    if (idx === 0 || ((idx - 1) === 0 && parMarks3[0].type === 'whitespace')
+      || parMarks3[idx - 1].text === '('
       || (parMarks3[idx - 2].type === 'operator'
         && parMarks3[idx - 1].type === 'whitespace')
       || (parMarks3[idx - 2].text === '('
@@ -280,7 +276,7 @@ function inChange(e) {
       && parMarks3[idx - 1].type === 'whitespace') {
 
       const combinedCityOper = groups.filter(g =>
-        g.combined === 'city'
+        g.hasLeft === 'city'
       ).reduce((acc, cur) => {
         if (acc) {
           return acc.concat(cur.operators);
@@ -349,7 +345,7 @@ function isLetter(c) {
 const groups = [
   {
     type: 'buildings',
-    combined: 'city',
+    hasLeft: 'city',
     operators: ['contain', 'notContain'],
     props: [
       { name: 'Stadium', type: 'prop' },
@@ -359,7 +355,7 @@ const groups = [
   },
   {
     type: 'states',
-    combined: 'city',
+    hasLeft: 'city',
     operators: ['is', 'notIs'],
     props: [
       { name: 'Polluted', type: 'prop' },
