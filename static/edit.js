@@ -82,18 +82,18 @@ function inChange(e) {
   depthIndex = 0;
   opening = true;
 
-  let parMarks3 = [];
+  let tokenList = [];
 
-  const checkPreviousTypeWithSpace = (index, type) => {
-    return parMarks3[index - 2].type === type
-      && parMarks3[index - 1].type === 'whitespace';
+  const checkPreviousType = (index, type) => {
+    return tokenList[index - 2].type === type
+      && tokenList[index - 1].type === 'whitespace';
   }
 
 
 
   for (let i = 0; i < plainArray.length; i++) {
     if (plainArray[i].charCodeAt(0) === 160 || plainArray[i].charCodeAt(0) === 32) {
-      parMarks3.push({ text: plainArray[i].replace(/ /g, '&nbsp;'), cssClass: 'nostyle', type: 'whitespace' })
+      tokenList.push({ text: plainArray[i].replace(/ /g, '&nbsp;'), cssClass: 'nostyle', type: 'whitespace' })
     }
     else if (plainArray[i] === '(') {
       if (opening === false) {
@@ -102,7 +102,7 @@ function inChange(e) {
       else {
         depthIndex += 1;
       }
-      parMarks3.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'openingParentheses' })
+      tokenList.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'openingParentheses' })
     }
     else if (plainArray[i] === ')') {
       if (opening === true) {
@@ -111,28 +111,28 @@ function inChange(e) {
       else {
         depthIndex -= 1;
       }
-      parMarks3.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'closingParentheses' })
+      tokenList.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'closingParentheses' })
     }
     else if (plainArray[i].toUpperCase() === 'AND' || plainArray[i].toUpperCase() === 'OR') {
-      parMarks3.push({ text: plainArray[i].toUpperCase(), cssClass: 'oper', type: 'operator' })
+      tokenList.push({ text: plainArray[i].toUpperCase(), cssClass: 'oper', type: 'operator' })
     }
     else if (isWord(plainArray[i])) {
-      if (i === 0 || ((i - 1) === 0 && parMarks3[0].type)
-        || parMarks3[i - 1].type === 'openingParentheses'
-        || checkPreviousTypeWithSpace(i, 'openingParentheses')
-        || checkPreviousTypeWithSpace(i, 'operator')) {
+      if (i === 0 || ((i - 1) === 0 && tokenList[0].type)
+        || tokenList[i - 1].type === 'openingParentheses'
+        || checkPreviousType(i, 'openingParentheses')
+        || checkPreviousType(i, 'operator')) {
         let found = leftParam[0].props.find(prop => prop.name === plainArray[i]);
         if (found) {
-          parMarks3.push({ text: found.name, type: leftParam[0].type, cssClass: cssClass[found.country] });
+          tokenList.push({ text: found.name, type: leftParam[0].type, cssClass: cssClass[found.country] });
         }
         else {
 
-          parMarks3.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
+          tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
-      else if (checkPreviousTypeWithSpace(i, 'city')) {
+      else if (checkPreviousType(i, 'city')) {
         const hasLeftCity = groups.filter(g =>
-          g.hasLeft === 'city'
+          g.hasLeft === tokenList[i-2].type
         );
         let notFound = true;
 
@@ -141,7 +141,7 @@ function inChange(e) {
           opIndex = 0;
           while (opIndex < hasLeftCity[index].operators.length && notFound) {
             if (hasLeftCity[index].operators[opIndex] === plainArray[i]) {
-              parMarks3.push({ text: plainArray[i], type: hasLeftCity[index].type, cssClass: hasLeftCity[index].type })
+              tokenList.push({ text: plainArray[i], type: hasLeftCity[index].type, cssClass: hasLeftCity[index].type })
               notFound = false
             }
             opIndex += 1;
@@ -149,17 +149,17 @@ function inChange(e) {
           index += 1;
         }
         if (notFound) {
-          parMarks3.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
+          tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
       else {
 
-        parMarks3.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
+        tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
       }
 
     }
     else {
-      parMarks3.push({ text: plainArray[i], cssClass: 'error', type: 'error' })
+      tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' })
     }
   }
 
@@ -237,9 +237,9 @@ function inChange(e) {
     let curLength = 0;
     let idx = 0;
     while (caretPosTemp > curLength) {
-      curLength = parMarks3[idx].text.length;
-      if (parMarks3[idx].text.includes('&nbsp;')) {
-        curLength = parMarks3[idx].text.length / 6;
+      curLength = tokenList[idx].text.length;
+      if (tokenList[idx].text.includes('&nbsp;')) {
+        curLength = tokenList[idx].text.length / 6;
         console.log(curLength);
 
       }
@@ -256,12 +256,12 @@ function inChange(e) {
     // console.log('idx-1 :' + parMarks2[idx - 1].text);
     // console.log('idx-2 :' + parMarks2[idx - 2].text);
     if (forWord === 0) { idx--; }
-    if (idx === 0 || ((idx - 1) === 0 && parMarks3[0].type === 'whitespace')
-      || parMarks3[idx - 1].text === '('
-      || (parMarks3[idx - 2].type === 'operator'
-        && parMarks3[idx - 1].type === 'whitespace')
-      || (parMarks3[idx - 2].text === '('
-        && parMarks3[idx - 1].type === 'whitespace')
+    if (idx === 0 || ((idx - 1) === 0 && tokenList[0].type === 'whitespace')
+      || tokenList[idx - 1].text === '('
+      || (tokenList[idx - 2].type === 'operator'
+        && tokenList[idx - 1].type === 'whitespace')
+      || (tokenList[idx - 2].text === '('
+        && tokenList[idx - 1].type === 'whitespace')
     ) {
       let ac = leftParam[0].props.filter((f) => {
         return f.name.includes(word);
@@ -272,8 +272,8 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
-    else if (parMarks3[idx - 2].type === 'city'
-      && parMarks3[idx - 1].type === 'whitespace') {
+    else if (tokenList[idx - 2].type === 'city'
+      && tokenList[idx - 1].type === 'whitespace') {
 
       const combinedCityOper = groups.filter(g =>
         g.hasLeft === 'city'
@@ -290,8 +290,8 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
-    else if (parMarks3[idx - 2].type === 'buildings'
-      && parMarks3[idx - 1].type === 'whitespace') {
+    else if (tokenList[idx - 2].type === 'buildings'
+      && tokenList[idx - 1].type === 'whitespace') {
 
       groups[0].props.forEach(f => {
         let el = document.createElement('li');
@@ -299,8 +299,8 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
-    else if (parMarks3[idx - 2].type === 'states'
-      && parMarks3[idx - 1].type === 'whitespace') {
+    else if (tokenList[idx - 2].type === 'states'
+      && tokenList[idx - 1].type === 'whitespace') {
 
       groups[1].props.forEach(f => {
         let el = document.createElement('li');
@@ -321,11 +321,11 @@ function inChange(e) {
   input.innerHTML = '';
   let formated = '';
 
-  for (let i = 0; i < parMarks3.length; i++) {
-    formated += '<span class="' + parMarks3[i].cssClass + '">' + parMarks3[i].text + '</span>';
+  for (let i = 0; i < tokenList.length; i++) {
+    formated += '<span class="' + tokenList[i].cssClass + '">' + tokenList[i].text + '</span>';
   }
 
-  // console.log(parMarks3);
+  // console.log(tokenList);
   // console.log(formated);
 
 
