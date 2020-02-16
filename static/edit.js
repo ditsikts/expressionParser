@@ -89,6 +89,14 @@ function inChange(e) {
       && tokenList[index - 1].type === 'whitespace';
   }
 
+  const checkPreviousTypeList = (index, typeList) => {
+    for (let indexType = 0; indexType < typeList.length; indexType++) {
+      if (checkPreviousType(index, typeList[indexType])) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 
   for (let i = 0; i < plainArray.length; i++) {
@@ -119,8 +127,7 @@ function inChange(e) {
     else if (isWord(plainArray[i])) {
       if (i === 0 || ((i - 1) === 0 && tokenList[0].type)
         || tokenList[i - 1].type === 'openingParentheses'
-        || checkPreviousType(i, 'openingParentheses')
-        || checkPreviousType(i, 'operator')) {
+        || checkPreviousTypeList(i, ['openingParentheses','operator'])) {
         let found = leftParam[0].props.find(prop => prop.name === plainArray[i]);
         if (found) {
           tokenList.push({ text: found.name, type: leftParam[0].type, cssClass: cssClass[found.country] });
@@ -130,9 +137,9 @@ function inChange(e) {
           tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
-      else if (checkPreviousType(i, 'city')) {
+      else if (checkPreviousTypeList(i, leftParam.map(g => g.type))) {
         const hasLeftCity = groups.filter(g =>
-          g.hasLeft === tokenList[i-2].type
+          g.hasLeft === tokenList[i - 2].type
         );
         let notFound = true;
 
@@ -152,8 +159,25 @@ function inChange(e) {
           tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
-      else {
+      else if (checkPreviousTypeList(i, groups.map(g => g.type))) {
+        const hasLeftGroup = groups.find(g =>
+          g.type === tokenList[i - 2].type
+        );
+        let notFound = true;
 
+          opIndex = 0;
+          while (opIndex < hasLeftGroup.props.length && notFound) {
+            if (hasLeftGroup.props[opIndex].name === plainArray[i]) {
+              tokenList.push({ text: plainArray[i], type: hasLeftGroup.props[opIndex].type, cssClass: hasLeftGroup.props[opIndex].type })
+              notFound = false
+            }
+            opIndex += 1;
+          }
+        if (notFound) {
+          tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
+        }
+      }
+      else {
         tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
       }
 
@@ -164,73 +188,7 @@ function inChange(e) {
   }
 
 
-  // return;
-
-
-  //   else if (isLetter(plain[i]) && !isLetter(plain[i - 1])) {
-
-  //     else if ((parMarks2[parMarks2.length - 2].type === 'buildings'
-  //       && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
-
-  //       let notFound = true;
-  //       let iOf = -1;
-  //       let k = 0;
-
-  //       while (notFound && k < groups[0].props.length) {
-  //         iOf = plain.indexOf(groups[0].props[k].name, i);
-  //         if (iOf === i) {
-  //           parMarks2.push({ text: groups[0].props[k].name, type: groups[0].props[k].type, cssClass: cssClass[groups[0].props[k].type] });
-  //           notFound = false;
-  //           i += groups[0].props[k].name.length - 1;
-  //         }
-  //         k += 1;
-  //       }
-  //       if (notFound) {
-  //         const [word,] = wordAtIndex(plain, i);
-  //         parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
-  //         i += word.length - 1;
-  //       }
-  //     }
-  //     else if ((parMarks2[parMarks2.length - 2].type === 'states'
-  //       && parMarks2[parMarks2.length - 1].type === 'whitespace')) {
-
-  //       let notFound = true;
-  //       let iOf = -1;
-  //       let k = 0;
-
-  //       while (notFound && k < groups[1].props.length) {
-  //         iOf = plain.indexOf(groups[1].props[k].name, i);
-  //         if (iOf === i) {
-  //           parMarks2.push({ text: groups[1].props[k].name, type: groups[1].props[k].type, cssClass: cssClass[groups[1].props[k].type] });
-  //           notFound = false;
-  //           i += groups[1].props[k].name.length - 1;
-  //         }
-  //         k += 1;
-  //       }
-  //       if (notFound) {
-  //         const [word,] = wordAtIndex(plain, i);
-  //         parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
-  //         i += word.length - 1;
-  //       }
-  //     }
-  //     else {
-  //       const [word,] = wordAtIndex(plain, i);
-  //       parMarks2.push({ text: word, cssClass: 'error', type: 'error' });
-  //       i += word.length - 1;
-  //     }
-
-  //   }
-  //   else {
-  //     parMarks2.push({ text: plain[i], cssClass: 'error', type: 'error' })
-  //     console.log('#' + plain[i] + '#');
-  //     // console.log('charcode #' + plain.charCodeAt(i) + '#');
-
-  //   }
-
-  // }
-
   const [word, forWord, backWord] = wordAtIndex(plain, caretPos);
-
 
   if (word != '') {
     let caretPosTemp = caretPos;
@@ -240,8 +198,6 @@ function inChange(e) {
       curLength = tokenList[idx].text.length;
       if (tokenList[idx].text.includes('&nbsp;')) {
         curLength = tokenList[idx].text.length / 6;
-        console.log(curLength);
-
       }
       if (caretPosTemp < curLength) {
         break
