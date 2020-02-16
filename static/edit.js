@@ -127,13 +127,23 @@ function inChange(e) {
     else if (isWord(plainArray[i])) {
       if (i === 0 || ((i - 1) === 0 && tokenList[0].type)
         || tokenList[i - 1].type === 'openingParentheses'
-        || checkPreviousTypeList(i, ['openingParentheses','operator'])) {
-        let found = leftParam[0].props.find(prop => prop.name === plainArray[i]);
-        if (found) {
-          tokenList.push({ text: found.name, type: leftParam[0].type, cssClass: cssClass[found.country] });
-        }
-        else {
+        || checkPreviousTypeList(i, ['openingParentheses', 'operator'])) {
 
+        let notFound = true;
+
+        index = 0;
+        while (index < leftParam.length && notFound) {
+          opIndex = 0;
+          while (opIndex < leftParam[index].props.length && notFound) {
+            if (leftParam[index].props[opIndex].name === plainArray[i]) {
+              tokenList.push({ text: leftParam[index].props[opIndex].name, type: leftParam[index].type, cssClass: cssClass[leftParam[index].props[opIndex].category] }); notFound = false
+              notFound = false
+            }
+            opIndex += 1;
+          }
+          index += 1;
+        }
+        if (notFound) {
           tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
@@ -148,7 +158,7 @@ function inChange(e) {
           opIndex = 0;
           while (opIndex < hasLeftCity[index].operators.length && notFound) {
             if (hasLeftCity[index].operators[opIndex] === plainArray[i]) {
-              tokenList.push({ text: plainArray[i], type: hasLeftCity[index].type, cssClass: hasLeftCity[index].type })
+              tokenList.push({ text: plainArray[i], type: hasLeftCity[index].type, cssClass: cssClass[hasLeftCity[index].type] })
               notFound = false
             }
             opIndex += 1;
@@ -165,14 +175,14 @@ function inChange(e) {
         );
         let notFound = true;
 
-          opIndex = 0;
-          while (opIndex < hasLeftGroup.props.length && notFound) {
-            if (hasLeftGroup.props[opIndex].name === plainArray[i]) {
-              tokenList.push({ text: plainArray[i], type: hasLeftGroup.props[opIndex].type, cssClass: hasLeftGroup.props[opIndex].type })
-              notFound = false
-            }
-            opIndex += 1;
+        opIndex = 0;
+        while (opIndex < hasLeftGroup.props.length && notFound) {
+          if (hasLeftGroup.props[opIndex].name === plainArray[i]) {
+            tokenList.push({ text: plainArray[i], type: hasLeftGroup.props[opIndex].type, cssClass: hasLeftGroup.props[opIndex].type })
+            notFound = false
           }
+          opIndex += 1;
+        }
         if (notFound) {
           tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
@@ -300,6 +310,16 @@ function isLetter(c) {
 
 const groups = [
   {
+    type: 'carState',
+    hasLeft: 'car',
+    operators: ['is', 'notIs'],
+    props: [
+      { name: 'New', type: 'prop' },
+      { name: 'Old', type: 'prop' },
+      { name: 'Abandoned', type: 'prop' }
+    ]
+  },
+  {
     type: 'buildings',
     hasLeft: 'city',
     operators: ['contain', 'notContain'],
@@ -327,7 +347,10 @@ const cssClass = {
   France: 'france',
   buildings: 'buildings',
   states: 'states',
-  prop: 'prop'
+  prop: 'prop',
+  Hyundai: 'hyundai',
+  Toyota: 'toyota',
+  carState: 'states'
 }
 const leftParam = [
   {
@@ -337,38 +360,59 @@ const leftParam = [
       {
         "id": "1",
         "name": "Phoenix",
-        "country": "USA"
+        "category": "USA"
       },
       {
         "id": "2",
         "name": "Florida",
-        "country": "USA"
+        "category": "USA"
       },
       {
         "id": "3",
         "name": "NewYork",
-        "country": "USA"
+        "category": "USA"
       },
       {
         "id": "4",
         "name": "Parma",
-        "country": "Italy"
+        "category": "Italy"
       },
       {
         "id": "5",
         "name": "Naples",
-        "country": "Italy"
+        "category": "Italy"
       },
 
       {
         "id": "6",
         "name": "Paris",
-        "country": "France"
+        "category": "France"
       },
       {
         "id": "7",
         "name": "Nice",
-        "country": "France"
+        "category": "France"
+      },
+    ]
+  },
+  {
+    type: 'car',
+    hasLeft: ['openingParentheses', 'operator'],
+    props: [
+      {
+        "id": "1",
+        "name": "Aygo",
+        "category": "Toyota"
+      },
+      {
+        "id": "2",
+        "name": "Getz",
+        "category": "Hyundai"
+      },
+      {
+        "id": "3",
+        "name": "Yaris",
+        "category": "Toyota"
       },
     ]
   },
