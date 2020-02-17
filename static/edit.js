@@ -125,6 +125,7 @@ function inChange(e) {
       tokenList.push({ text: plainArray[i].toUpperCase(), cssClass: 'oper', type: 'operator' })
     }
     else if (isWord(plainArray[i])) {
+      //check for left parameter recognition
       if (i === 0 || ((i - 1) === 0 && tokenList[0].type)
         || tokenList[i - 1].type === 'openingParentheses'
         || checkPreviousTypeList(i, ['openingParentheses', 'operator'])) {
@@ -147,6 +148,7 @@ function inChange(e) {
           tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
+      //check for mid parameter recognition
       else if (checkPreviousTypeList(i, groups.map(g => g.hasLeft))) {
         const hasLeft = groups.filter(g =>
           g.hasLeft === tokenList[i - 2].type
@@ -169,6 +171,7 @@ function inChange(e) {
           tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
+      //check for right parameter recognition
       else if (checkPreviousTypeList(i, groups.map(g => g.type))) {
         const hasLeftGroup = groups.find(g =>
           g.type === tokenList[i - 2].type
@@ -222,6 +225,7 @@ function inChange(e) {
     // console.log('idx-1 :' + parMarks2[idx - 1].text);
     // console.log('idx-2 :' + parMarks2[idx - 2].text);
     if (forWord === 0) { idx--; }
+    //check for left Parameter suggestions
     if (idx === 0 || ((idx - 1) === 0 && tokenList[0].type === 'whitespace')
       || tokenList[idx - 1].text === '('
       || (tokenList[idx - 2].type === 'operator'
@@ -244,6 +248,7 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
+    //check for mid Parameter suggestions
     else if (checkPreviousTypeList(idx, groups.map(g => g.hasLeft))) {
 
       const combinedOper = groups.filter(g =>
@@ -261,6 +266,7 @@ function inChange(e) {
         lis.appendChild(el);
       })
     }
+    //check for right Parameter suggestions
     else if (checkPreviousTypeList(idx, groups.map(g => g.type))) {
       const hasLeftGroup = groups.find(g =>
         g.type === tokenList[idx - 2].type
