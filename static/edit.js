@@ -149,8 +149,8 @@ function inChange(e) {
         }
       }
       //check for mid parameter recognition
-      else if (checkPreviousTypeList(i, groups.map(g => g.hasLeft))) {
-        const hasLeft = groups.filter(g =>
+      else if (checkPreviousTypeList(i, midParam.map(g => g.hasLeft))) {
+        const hasLeft = midParam.filter(g =>
           g.hasLeft === tokenList[i - 2].type
         );
         let notFound = true;
@@ -172,16 +172,16 @@ function inChange(e) {
         }
       }
       //check for right parameter recognition
-      else if (checkPreviousTypeList(i, groups.map(g => g.type))) {
-        const hasLeftGroup = groups.find(g =>
+      else if (checkPreviousTypeList(i, midParam.map(g => g.type))) {
+        const hasLeftGroup = midParam.find(g =>
           g.type === tokenList[i - 2].type
         );
         let notFound = true;
 
         opIndex = 0;
-        while (opIndex < hasLeftGroup.props.length && notFound) {
-          if (hasLeftGroup.props[opIndex].name === plainArray[i]) {
-            tokenList.push({ text: plainArray[i], type: hasLeftGroup.props[opIndex].type, cssClass: hasLeftGroup.props[opIndex].type })
+        while (opIndex < hasLeftGroup.rightParam.length && notFound) {
+          if (hasLeftGroup.rightParam[opIndex].name === plainArray[i]) {
+            tokenList.push({ text: plainArray[i], type: hasLeftGroup.rightParam[opIndex].type, cssClass: hasLeftGroup.rightParam[opIndex].type })
             notFound = false
           }
           opIndex += 1;
@@ -249,9 +249,9 @@ function inChange(e) {
       })
     }
     //check for mid Parameter suggestions
-    else if (checkPreviousTypeList(idx, groups.map(g => g.hasLeft))) {
+    else if (checkPreviousTypeList(idx, midParam.map(g => g.hasLeft))) {
 
-      const combinedOper = groups.filter(g =>
+      const combinedOper = midParam.filter(g =>
         g.hasLeft === tokenList[idx - 2].type
       ).reduce((acc, cur) => {
         if (acc) {
@@ -267,11 +267,11 @@ function inChange(e) {
       })
     }
     //check for right Parameter suggestions
-    else if (checkPreviousTypeList(idx, groups.map(g => g.type))) {
-      const hasLeftGroup = groups.find(g =>
+    else if (checkPreviousTypeList(idx, midParam.map(g => g.type))) {
+      const hasLeftGroup = midParam.find(g =>
         g.type === tokenList[idx - 2].type
       );
-      hasLeftGroup.props.forEach(f => {
+      hasLeftGroup.rightParam.forEach(f => {
         let el = document.createElement('li');
         el.innerText = f.name;
         lis.appendChild(el);
@@ -310,12 +310,12 @@ function isLetter(c) {
 //   {previousType:'openingParentheses', },{}
 // ]
 
-const groups = [
+const midParam = [
   {
     type: 'carState',
     hasLeft: 'car',
     operators: ['is', 'notIs'],
-    props: [
+    rightParam: [
       { name: 'New', type: 'prop' },
       { name: 'Old', type: 'prop' },
       { name: 'Abandoned', type: 'prop' }
@@ -325,7 +325,7 @@ const groups = [
     type: 'buildings',
     hasLeft: 'city',
     operators: ['contain', 'notContain'],
-    props: [
+    rightParam: [
       { name: 'Stadium', type: 'prop' },
       { name: 'Zoo', type: 'prop' },
       { name: 'Casino', type: 'prop' }
@@ -335,7 +335,7 @@ const groups = [
     type: 'states',
     hasLeft: 'city',
     operators: ['is', 'notIs'],
-    props: [
+    rightParam: [
       { name: 'Polluted', type: 'prop' },
       { name: 'Overpopulated', type: 'prop' },
       { name: 'Rich', type: 'prop' }
