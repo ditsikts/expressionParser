@@ -147,18 +147,18 @@ function inChange(e) {
           tokenList.push({ text: plainArray[i], cssClass: 'error', type: 'error' });
         }
       }
-      else if (checkPreviousTypeList(i, leftParam.map(g => g.type))) {
-        const hasLeftCity = groups.filter(g =>
+      else if (checkPreviousTypeList(i, groups.map(g => g.hasLeft))) {
+        const hasLeft = groups.filter(g =>
           g.hasLeft === tokenList[i - 2].type
         );
         let notFound = true;
 
         index = 0;
-        while (index < hasLeftCity.length && notFound) {
+        while (index < hasLeft.length && notFound) {
           opIndex = 0;
-          while (opIndex < hasLeftCity[index].operators.length && notFound) {
-            if (hasLeftCity[index].operators[opIndex] === plainArray[i]) {
-              tokenList.push({ text: plainArray[i], type: hasLeftCity[index].type, cssClass: cssClass[hasLeftCity[index].type] })
+          while (opIndex < hasLeft[index].operators.length && notFound) {
+            if (hasLeft[index].operators[opIndex] === plainArray[i]) {
+              tokenList.push({ text: plainArray[i], type: hasLeft[index].type, cssClass: cssClass[hasLeft[index].type] })
               notFound = false
             }
             opIndex += 1;
@@ -229,20 +229,25 @@ function inChange(e) {
       || (tokenList[idx - 2].text === '('
         && tokenList[idx - 1].type === 'whitespace')
     ) {
-      let ac = leftParam[0].props.filter((f) => {
-        return f.name.includes(word);
-      })
+      let ac = [];
+
+      for (let i = 0; i < leftParam.length; i++) {
+        for (let z = 0; z < leftParam[i].props.length; z++) {
+          if (leftParam[i].props[z].name.includes(word)) {
+            ac.push(leftParam[i].props[z].name);
+          }
+        }
+      }
       ac.forEach(f => {
         let el = document.createElement('li');
-        el.innerText = f.name;
+        el.innerText = f;
         lis.appendChild(el);
       })
     }
-    else if (tokenList[idx - 2].type === 'city'
-      && tokenList[idx - 1].type === 'whitespace') {
+    else if (checkPreviousTypeList(idx, groups.map(g => g.hasLeft))) {
 
-      const combinedCityOper = groups.filter(g =>
-        g.hasLeft === 'city'
+      const combinedOper = groups.filter(g =>
+        g.hasLeft === tokenList[idx - 2].type
       ).reduce((acc, cur) => {
         if (acc) {
           return acc.concat(cur.operators);
@@ -250,31 +255,22 @@ function inChange(e) {
         return cur.operators;
       }, [])
       // console.log(combinedCity);
-      combinedCityOper.forEach(f => {
+      combinedOper.forEach(f => {
         let el = document.createElement('li');
         el.innerText = f;
         lis.appendChild(el);
       })
     }
-    else if (tokenList[idx - 2].type === 'buildings'
-      && tokenList[idx - 1].type === 'whitespace') {
-
-      groups[0].props.forEach(f => {
+    else if (checkPreviousTypeList(idx, groups.map(g => g.type))) {
+      const hasLeftGroup = groups.find(g =>
+        g.type === tokenList[idx - 2].type
+      );
+      hasLeftGroup.props.forEach(f => {
         let el = document.createElement('li');
         el.innerText = f.name;
         lis.appendChild(el);
       })
     }
-    else if (tokenList[idx - 2].type === 'states'
-      && tokenList[idx - 1].type === 'whitespace') {
-
-      groups[1].props.forEach(f => {
-        let el = document.createElement('li');
-        el.innerText = f.name;
-        lis.appendChild(el);
-      })
-    }
-
   }
 
 
