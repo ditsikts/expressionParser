@@ -103,23 +103,31 @@ function inChange(e) {
     if (plainArray[i].charCodeAt(0) === 160 || plainArray[i].charCodeAt(0) === 32) {
       tokenList.push({ text: plainArray[i].replace(/ /g, '&nbsp;'), cssClass: 'nostyle', type: 'whitespace' })
     }
-    else if (plainArray[i] === '(') {
-      if (opening === false) {
-        opening = true;
+    else if (plainArray[i] === '(' || plainArray[i] === ')') {
+      if (plainArray[i] === '(') {
+        if (opening === false) {
+          opening = true;
+        }
+        else {
+          depthIndex += 1;
+        }
       }
       else {
-        depthIndex += 1;
+        if (opening === true) {
+          opening = false;
+        }
+        else {
+          depthIndex -= 1;
+        }
       }
-      tokenList.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'openingParentheses' })
-    }
-    else if (plainArray[i] === ')') {
-      if (opening === true) {
-        opening = false;
+      let cssClassVal = '';
+      if (depthIndex < 1) {
+        cssClassVal = 'error';
       }
       else {
-        depthIndex -= 1;
+        cssClassVal = 'par' + depthIndex;
       }
-      tokenList.push({ text: plainArray[i], cssClass: 'par' + depthIndex, depth: depthIndex, type: 'closingParentheses' })
+      tokenList.push({ text: plainArray[i], cssClass: cssClassVal, depth: depthIndex, type: 'openingParentheses' })
     }
     else if (plainArray[i].toUpperCase() === 'AND' || plainArray[i].toUpperCase() === 'OR') {
       tokenList.push({ text: plainArray[i].toUpperCase(), cssClass: 'oper', type: 'operator' })
