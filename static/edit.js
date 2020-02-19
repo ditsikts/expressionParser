@@ -4,17 +4,6 @@ let lis = document.getElementById('auto');
 input.addEventListener('keyup', inChange);
 var caret = new VanillaCaret(input);
 
-
-// const previousChar = (wordStartPos) => {
-//   while (plain.charAt(wordStartPos) != null
-//     && plain.charAt(wordStartPos) != undefined
-//     && (plain.charCodeAt(wordStartPos) == 160
-//       || plain.charCodeAt(wordStartPos) == 32)) {
-
-//     wordStartPos -= 1;//keeps position of previous non space char
-//   }
-//   return wordStartPos;
-// }
 const wordAtIndex = (plain, caretPos) => {
 
   let word = '';
