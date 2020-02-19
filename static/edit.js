@@ -44,20 +44,6 @@ function isWord(str) {
 
 function inChange(e) {
 
-  // if(e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40){
-  //   console.log('arrowpressed');
-  //   return;
-  // }
-
-  // elem = input.children[1];
-  // if (elem) {
-  //   elem.innerText += 'KO';
-  // }
-  // console.log(input.childNodes);
-
-  // if (input.childNodes[3].nodeType == Node.TEXT_NODE)console.log('found text');
-
-
   let caretPos = caret.getPos();
 
   lis.innerHTML = '';
@@ -65,9 +51,7 @@ function inChange(e) {
   // console.log(plain);
 
   const plainArray = input.innerText.split(/(\s+|\w+|\(|\))/).filter(item => item.length > 0);
-  console.log(plainArray);
-
-
+  
   depthIndex = 0;
   opening = true;
 
@@ -276,13 +260,6 @@ function inChange(e) {
     }
   }
 
-
-  //normalize parentheses
-  // parMarks = [...parMarks].reduce((acc, curr) => {
-  //   acc += (4 - curr);
-  //   return acc;
-  // }, '')
-
   input.innerHTML = '';
   let formated = '';
 
@@ -290,8 +267,7 @@ function inChange(e) {
     formated += '<span class="' + tokenList[i].cssClass + '">' + tokenList[i].text + '</span>';
   }
 
-  // console.log(tokenList);
-  // console.log(formated);
+  console.log(tokenList);
 
 
   input.innerHTML = formated;
@@ -303,9 +279,6 @@ function isLetter(c) {
   return c.toLowerCase() != c.toUpperCase();
 }
 
-// const dropdowns = [
-//   {previousType:'openingParentheses', },{}
-// ]
 
 const midParam = [
   {
