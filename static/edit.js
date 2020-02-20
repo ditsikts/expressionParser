@@ -41,9 +41,12 @@ function isWord(str) {
   }
   return true;
 };
-
+let omok=0;
 function inChange(e) {
-
+  init()
+  omok+=1;
+  if(omok>3){
+  printMessage("kokoko")}
   let caretPos = caret.getPos();
 
   lis.innerHTML = '';
