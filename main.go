@@ -3,11 +3,7 @@ import (
 	"syscall/js"
 )
 
-var c chan bool
 
-func init() {
-	c = make(chan bool)
-}
 
 func printMessage(this js.Value, inputs []js.Value) interface{} {
 	message := inputs[0].String()
@@ -16,13 +12,16 @@ func printMessage(this js.Value, inputs []js.Value) interface{} {
 	p := document.Call("createElement", "p")
 	p.Set("innerHTML", message)
 	document.Get("body").Call("appendChild", p)
-
-    c <- true
-    return "caal func"
+	
+    return 5
 }
 
 func main() {
+
+	c :=make (chan struct{},0)
+	
 	js.Global().Set("printMessage", js.FuncOf(printMessage))
+
 	<-c
 	println("We are out of here")
 }
