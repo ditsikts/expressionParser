@@ -7,4 +7,10 @@ var caretWasm = new VanillaCaret(inputWasm);
 
 function inChangeWasm(e) {
 
+    const plainWasm = inputWasm.innerText;
+    let caretPos = caretWasm.getPos();
+
+    let mess = printMessage(plainWasm);
+
+    console.log('aaa ' + mess);
 }
