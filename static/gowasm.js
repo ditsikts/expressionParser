@@ -12,12 +12,9 @@ function inChangeWasm(e) {
 
     let mess = generateTokens(
         plainWasm,
-        JSON.stringify({
-            "id": "3",
-            "name": "NewYork",
-            "category": "USA"
-          })
-        );
+        JSON.stringify(leftParam),
+        JSON.stringify(midParam)
+    );
 
     console.log(mess);
 }
