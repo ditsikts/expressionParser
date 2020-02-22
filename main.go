@@ -6,11 +6,11 @@ import (
 
 
 func printMessage(this js.Value, inputs []js.Value) interface{} {
-	message := inputs[0].String()
+	plain := inputs[0].String()
 
 	document := js.Global().Get("document")
 	p := document.Call("createElement", "p")
-	p.Set("innerHTML", message)
+	p.Set("innerHTML", plain)
 	document.Get("body").Call("appendChild", p)
 	
     return 5

@@ -4,23 +4,29 @@
   <link rel="stylesheet" href="edit.css" />
   <script src="wasm_exec.js"></script>
   <script>
-        async function init() {
-            const go = new Go();
-            let result = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
-            go.run(result.instance);
-        }
-        init();
-   </script>
+    async function init() {
+      const go = new Go();
+      let result = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
+      go.run(result.instance);
+    }
+    init();
+  </script>
 </head>
 
 <body>
+  <div>
+    <div contenteditable="true" class="input"></div>
+    <ul id="auto">
+  </div>
 
-  <div contenteditable="true" class="input"></div>
-  <ul id="auto">
-
+  <div>
+    <div contenteditable="true" class="inputWasm"></div>
+    <ul id="autoWasm">
+  </div>
   </ul>
   <script src="https://cdn.jsdelivr.net/npm/vanilla-caret-js@1.0.1/dist/VanillaCaret.min.js"></script>
   <script src="edit.js"></script>
+  <script src="gowasm.js"></script>
 </body>
 
 </html>

@@ -45,9 +45,9 @@ function isWord(str) {
 function inChange(e) {
   // init()
   
-  let mess = printMessage("kokoko");
+  // let mess = printMessage("kokoko");
 
-  console.log('aaa '+mess);
+  // console.log('aaa '+mess);
   
 
   let caretPos = caret.getPos();

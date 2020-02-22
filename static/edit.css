@@ -3,7 +3,7 @@
     font-size: 1.2em;
   }
 
-  .input {
+  .input, .inputWasm {
     border: 1px solid #aaa;
     margin: 10px;
     width: 1200px;
