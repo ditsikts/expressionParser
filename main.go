@@ -6,22 +6,21 @@ import (
 	"encoding/json"
 )
 
-type prop struct{
-	id int `json:"id"`
-	name string `json:"name"`
-	category string `json:"category"`
+type Prop struct{
+	Id string `json:"id"`
+	Name string `json:"name"`
+	Category string `json:"category"`
 }
 
 func generateTokens(this js.Value, inputs []js.Value) interface{} {
 	plain := inputs[0].String()
 array := inputs[1].String()
-jsonArray := []byte(array)
-var prop1 prop
-err := json.Unmarshal(jsonArray, &prop1)
+ prop1 := Prop{}
+err := json.Unmarshal([]byte(array), &prop1)
 if err != nil {
     fmt.Println(err.Error())
 }
-fmt.Println(prop1.name)
+fmt.Println(prop1)
     re := regexp.MustCompile(`\w+|\s+|!=|.`)
 	println(array)
 	plainSplitted := re.FindAllString(plain, -1)
