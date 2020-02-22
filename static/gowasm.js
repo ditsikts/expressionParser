@@ -10,7 +10,14 @@ function inChangeWasm(e) {
     const plainWasm = inputWasm.innerText;
     let caretPos = caretWasm.getPos();
 
-    let mess = printMessage(plainWasm);
+    let mess = generateTokens(
+        plainWasm,
+        JSON.stringify({
+            "id": "3",
+            "name": "NewYork",
+            "category": "USA"
+          })
+        );
 
-    console.log('aaa ' + mess);
+    console.log(mess);
 }
