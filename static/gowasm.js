@@ -6,8 +6,8 @@ var caretWasm = new VanillaCaret(inputWasm);
 
 
 function inChangeWasm(e) {
-
-    const plainWasm = inputWasm.innerText;
+    const plainWasm = inputWasm.innerText
+        .replace(/\u00A0/g, '&nbsp;')
     let caretPos = caretWasm.getPos();
 
     let mess = generateTokens(
