@@ -28,17 +28,18 @@ type LeftParam struct {
 }
 
 func generateTokens(this js.Value, inputs []js.Value) interface{} {
-	plain := strings.ReplaceAll(inputs[0].String()," ","&nbsp;")
+	plain := strings.ReplaceAll(inputs[0].String(), " ", "&nbsp;")
 	leftParamJSON := inputs[1].String()
 	//midParamJSON := inputs[2].String()
+
 	var leftParam1 []LeftParam
 	err := json.Unmarshal([]byte(leftParamJSON), &leftParam1)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
 	fmt.Println(leftParam1[1].Type)
 	re := regexp.MustCompile(`\w+|(&nbsp;)+|!=|.`)
-	println(leftParamJSON)
 	plainSplitted := re.FindAllString(plain, -1)
 
 	fmt.Println(plainSplitted)
@@ -49,11 +50,10 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 	depthIndex := 0
 	for index < len(plainSplitted) {
 		if strings.Contains(plainSplitted[index], "&nbsp;") {
-			//fmt.Println(len(plainSplitted[index]), "#",plainSplitted[index],"#")
 			tokenList = append(tokenList, Token{
-				Text:       plainSplitted[index],
-				Type:       "whitespace",
-				CssClass:   "nostyle",
+				Text:     plainSplitted[index],
+				Type:     "whitespace",
+				CssClass: "nostyle",
 			})
 		} else if plainSplitted[index] == "(" {
 			if opening == false {
@@ -79,15 +79,30 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 				CssClass:   strings.Join([]string{"par", strconv.Itoa(depthIndex)}, ""),
 				DepthIndex: depthIndex,
 			})
+		} else {
+			tokenList = append(tokenList, Token{
+				Text:     plainSplitted[index],
+				Type:     "error",
+				CssClass: "error",
+			})
 		}
 
 		index += 1
 	}
 	fmt.Println(tokenList)
-	// document := js.Global().Get("document")
-	// p := document.Call("createElement", "p")
-	// p.Set("innerHTML", plain)
-	// document.Get("body").Call("appendChild", p)
+	var sb strings.Builder
+	for i := range tokenList {
+		sb.WriteString(`<span class="`)
+		sb.WriteString(tokenList[i].CssClass)
+		sb.WriteString(`">`)
+		sb.WriteString(tokenList[i].Text)
+		sb.WriteString(`</span>`)
+	}
+	fmt.Println(sb.String())
+	document := js.Global().Get("document")
+	p := document.Call("getElementById", "inputWasm")
+	p.Set("innerHTML", "")
+	p.Set("innerHTML", sb.String())
 
 	return "=================="
 }
