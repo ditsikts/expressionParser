@@ -16,5 +16,6 @@ function inChangeWasm(e) {
         JSON.stringify(midParam)
     );
 
+    caretWasm.setPos(caretPos);
     console.log(mess);
 }
