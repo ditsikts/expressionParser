@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall/js"
+	"unicode"
 )
 
 type Token struct {
@@ -27,6 +28,14 @@ type LeftParam struct {
 	Props   []Prop   `json:"props"`
 }
 
+func IsLetters(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
 func generateTokens(this js.Value, inputs []js.Value) interface{} {
 	plain := strings.ReplaceAll(inputs[0].String(), " ", "&nbsp;")
 	leftParamJSON := inputs[1].String()
@@ -48,6 +57,7 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 	opening := true
 	index := 0
 	depthIndex := 0
+	//length := len(plainSplitted) - 1
 	for index < len(plainSplitted) {
 		if strings.Contains(plainSplitted[index], "&nbsp;") {
 			tokenList = append(tokenList, Token{
@@ -78,6 +88,12 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 				Type:       "closingParentheses",
 				CssClass:   strings.Join([]string{"par", strconv.Itoa(depthIndex)}, ""),
 				DepthIndex: depthIndex,
+			})
+		}else if IsLetters(plainSplitted[index]){
+			tokenList = append(tokenList, Token{
+				Text:     plainSplitted[index],
+				Type:     "error",
+				CssClass: "italy",
 			})
 		} else {
 			tokenList = append(tokenList, Token{
@@ -112,7 +128,6 @@ func main() {
 	c := make(chan struct{}, 0)
 
 	js.Global().Set("generateTokens", js.FuncOf(generateTokens))
-
 	<-c
 	println("We are out of here")
 }
