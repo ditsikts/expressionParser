@@ -89,7 +89,15 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 				CssClass:   strings.Join([]string{"par", strconv.Itoa(depthIndex)}, ""),
 				DepthIndex: depthIndex,
 			})
-		}else if IsLetters(plainSplitted[index]){
+
+		} else if strings.ToUpper(plainSplitted[index]) == "AND" ||
+			strings.ToUpper(plainSplitted[index]) == "OR" {
+			tokenList = append(tokenList, Token{
+				Text:     strings.ToUpper(plainSplitted[index]),
+				Type:     "operator",
+				CssClass: "oper",
+			})
+		} else if IsLetters(plainSplitted[index]) {
 			tokenList = append(tokenList, Token{
 				Text:     plainSplitted[index],
 				Type:     "error",
