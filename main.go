@@ -98,11 +98,39 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 				CssClass: "oper",
 			})
 		} else if IsLetters(plainSplitted[index]) {
-			tokenList = append(tokenList, Token{
-				Text:     plainSplitted[index],
-				Type:     "error",
-				CssClass: "italy",
-			})
+			if index == 0 ||
+				((index-1) == 0 && tokenList[0].Type == "whitespace") {
+				notFound := true
+				lPindex := 0
+				for lPindex < len(leftParam1) && notFound {
+					prindex := 0
+					for prindex < len(leftParam1[lPindex].Props) && notFound {
+						if leftParam1[lPindex].Props[prindex].Name == plainSplitted[index] {
+							tokenList = append(tokenList, Token{
+								Text:     leftParam1[lPindex].Props[prindex].Name,
+								Type:     leftParam1[lPindex].Type,
+								CssClass: strings.ToLower(leftParam1[lPindex].Props[prindex].Category),
+							})
+							notFound = false
+						}
+						prindex += 1
+					}
+					lPindex += 1
+				}
+				if notFound {
+					tokenList = append(tokenList, Token{
+						Text:     plainSplitted[index],
+						Type:     "error",
+						CssClass: "error",
+					})
+				}
+			} else {
+				tokenList = append(tokenList, Token{
+					Text:     plainSplitted[index],
+					Type:     "error",
+					CssClass: "error",
+				})
+			}
 		} else {
 			tokenList = append(tokenList, Token{
 				Text:     plainSplitted[index],
