@@ -99,7 +99,12 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 			})
 		} else if IsLetters(plainSplitted[index]) {
 			if index == 0 ||
-				((index-1) == 0 && tokenList[0].Type == "whitespace") {
+				tokenList[index-1].Type == "openingParentheses" ||
+				((index-1) == 0 && tokenList[0].Type == "whitespace") ||
+				(tokenList[index-1].Type == "whitespace" &&
+					tokenList[index-2].Type == "openingParentheses") ||
+				(tokenList[index-1].Type == "whitespace" &&
+					tokenList[index-2].Type == "operator"){
 				notFound := true
 				lPindex := 0
 				for lPindex < len(leftParam1) && notFound {
