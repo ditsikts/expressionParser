@@ -59,50 +59,51 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 
 	fmt.Println(plainSplitted)
 
-	var tokenList []Token
+	tokenList := make([]Token, len(plainSplitted))
+
 	opening := true
 	index := 0
 	depthIndex := 0
 	//length := len(plainSplitted) - 1
 	for index < len(plainSplitted) {
 		if strings.Contains(plainSplitted[index], "&nbsp;") {
-			tokenList = append(tokenList, Token{
+			tokenList[index] =  Token{
 				Text:     plainSplitted[index],
 				Type:     "whitespace",
 				CssClass: "nostyle",
-			})
+			}
 		} else if plainSplitted[index] == "(" {
 			if opening == false {
 				opening = true
 			} else {
 				depthIndex += 1
 			}
-			tokenList = append(tokenList, Token{
+			tokenList[index]  = Token{
 				Text:       "(",
 				Type:       "openingParentheses",
 				CssClass:   strings.Join([]string{"par", strconv.Itoa(depthIndex)}, ""),
 				DepthIndex: depthIndex,
-			})
+			}
 		} else if plainSplitted[index] == ")" {
 			if opening == true {
 				opening = false
 			} else {
 				depthIndex -= 1
 			}
-			tokenList = append(tokenList, Token{
+			tokenList[index] = Token{
 				Text:       ")",
 				Type:       "closingParentheses",
 				CssClass:   strings.Join([]string{"par", strconv.Itoa(depthIndex)}, ""),
 				DepthIndex: depthIndex,
-			})
+			}
 
 		} else if strings.ToUpper(plainSplitted[index]) == "AND" ||
 			strings.ToUpper(plainSplitted[index]) == "OR" {
-			tokenList = append(tokenList, Token{
+			tokenList[index] =  Token{
 				Text:     strings.ToUpper(plainSplitted[index]),
 				Type:     "operator",
 				CssClass: "oper",
-			})
+			}
 		} else if IsLetters(plainSplitted[index]) {
 			if index == 0 ||
 				tokenList[index-1].Type == "openingParentheses" ||
@@ -115,11 +116,11 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 					prindex := 0
 					for prindex < len(leftParam1[lPindex].Props) && notFound {
 						if leftParam1[lPindex].Props[prindex].Name == plainSplitted[index] {
-							tokenList = append(tokenList, Token{
+							tokenList[index] = Token{
 								Text:     leftParam1[lPindex].Props[prindex].Name,
 								Type:     leftParam1[lPindex].Type,
 								CssClass: strings.ToLower(leftParam1[lPindex].Props[prindex].Category),
-							})
+							}
 							notFound = false
 						}
 						prindex += 1
@@ -127,25 +128,25 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 					lPindex += 1
 				}
 				if notFound {
-					tokenList = append(tokenList, Token{
+					tokenList[index] = Token{
 						Text:     plainSplitted[index],
 						Type:     "error",
 						CssClass: "error",
-					})
+					}
 				}
 			} else {
-				tokenList = append(tokenList, Token{
+				tokenList[index] =Token{
 					Text:     plainSplitted[index],
 					Type:     "error",
 					CssClass: "error",
-				})
+				}
 			}
 		} else {
-			tokenList = append(tokenList, Token{
+			tokenList[index]= Token{
 				Text:     plainSplitted[index],
 				Type:     "error",
 				CssClass: "error",
-			})
+			}
 		}
 
 		index += 1

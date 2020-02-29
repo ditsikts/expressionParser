@@ -1,13 +1,13 @@
 let inputWasm = document.querySelector('.inputWasm');
 let lisWasm = document.getElementById('autoWasm');
 
-inputWasm.addEventListener('keyup', inChangeWasm);
+inputWasm.addEventListener('input', inChangeWasm);
 var caretWasm = new VanillaCaret(inputWasm);
 
 
 function inChangeWasm(e) {
     const plainWasm = inputWasm.innerText
-        .replace(/\u00A0/g, '&nbsp;')
+        .replace(/\u00A0/g, '&nbsp;');
     let caretPos = caretWasm.getPos();
 
     let mess = generateTokens(
