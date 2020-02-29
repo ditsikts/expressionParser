@@ -323,7 +323,7 @@ const cssClass = {
   prop: 'prop',
   Hyundai: 'hyundai',
   Toyota: 'toyota',
-  carState: 'states'
+  carState: 'carstate'
 }
 const leftParam = [
   {

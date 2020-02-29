@@ -63,7 +63,7 @@
     color:lightseagreen
   }
 
-  .buildings, .states {
+  .buildings, .states, .carstate {
     color:darkmagenta;
   }
   .prop {

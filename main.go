@@ -32,9 +32,9 @@ type RightParam struct {
 	Type string `json:"type"`
 }
 type MidParam struct {
-	Type string `json:"type"`
-	HasLeft string `json:"hasLeft"`
-	Operators []string `json:"operators"`
+	Type        string       `json:"type"`
+	HasLeft     string       `json:"hasLeft"`
+	Operators   []string     `json:"operators"`
 	RightParams []RightParam `json:"rightParam"`
 }
 
@@ -47,9 +47,18 @@ func IsLetters(s string) bool {
 	return true
 }
 
-func checkPreviousType(tokenList []Token, index int, tokenType string) bool{
+func checkPreviousType(tokenList []Token, index int, tokenType string) bool {
 	return tokenList[index-1].Type == "whitespace" &&
-			tokenList[index-2].Type == tokenType
+		tokenList[index-2].Type == tokenType
+}
+
+func checkPreviousTypeList(tokenList []Token, index int, tokenTypeList []string) bool {
+	for _, tokenType := range tokenTypeList {
+		if checkPreviousType(tokenList, index, tokenType) {
+			return true
+		}
+	}
+	return false
 }
 
 func generateTokens(this js.Value, inputs []js.Value) interface{} {
@@ -83,7 +92,7 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 	//length := len(plainSplitted) - 1
 	for index < len(plainSplitted) {
 		if strings.Contains(plainSplitted[index], "&nbsp;") {
-			tokenList[index] =  Token{
+			tokenList[index] = Token{
 				Text:     plainSplitted[index],
 				Type:     "whitespace",
 				CssClass: "nostyle",
@@ -94,7 +103,7 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 			} else {
 				depthIndex += 1
 			}
-			tokenList[index]  = Token{
+			tokenList[index] = Token{
 				Text:       "(",
 				Type:       "openingParentheses",
 				CssClass:   strings.Join([]string{"par", strconv.Itoa(depthIndex)}, ""),
@@ -115,7 +124,7 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 
 		} else if strings.ToUpper(plainSplitted[index]) == "AND" ||
 			strings.ToUpper(plainSplitted[index]) == "OR" {
-			tokenList[index] =  Token{
+			tokenList[index] = Token{
 				Text:     strings.ToUpper(plainSplitted[index]),
 				Type:     "operator",
 				CssClass: "oper",
@@ -124,8 +133,8 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 			if index == 0 ||
 				tokenList[index-1].Type == "openingParentheses" ||
 				((index-1) == 0 && tokenList[0].Type == "whitespace") ||
-				checkPreviousType(tokenList, index,"operator")||
-				checkPreviousType(tokenList, index,"openingParentheses"){
+				checkPreviousType(tokenList, index, "operator") ||
+				checkPreviousType(tokenList, index, "openingParentheses") {
 				notFound := true
 				lPindex := 0
 				for lPindex < len(leftParam1) && notFound {
@@ -150,15 +159,40 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 						CssClass: "error",
 					}
 				}
+			} else if checkPreviousTypeList(tokenList, index, []string{"city", "car"}) {
+				notFound := true
+				mPindex := 0
+				for mPindex < len(midParam1) && notFound {
+					opindex := 0
+					for opindex < len(midParam1[mPindex].Operators) && notFound {
+						if midParam1[mPindex].Operators[opindex] == plainSplitted[index] {
+							tokenList[index] = Token{
+								Text:     midParam1[mPindex].Operators[opindex],
+								Type:     midParam1[mPindex].Type,
+								CssClass: strings.ToLower(midParam1[mPindex].Type),
+							}
+							notFound = false
+						}
+						opindex += 1
+					}
+					mPindex += 1
+				}
+				if notFound {
+					tokenList[index] = Token{
+						Text:     plainSplitted[index],
+						Type:     "error",
+						CssClass: "error",
+					}
+				}
 			} else {
-				tokenList[index] =Token{
+				tokenList[index] = Token{
 					Text:     plainSplitted[index],
 					Type:     "error",
 					CssClass: "error",
 				}
 			}
 		} else {
-			tokenList[index]= Token{
+			tokenList[index] = Token{
 				Text:     plainSplitted[index],
 				Type:     "error",
 				CssClass: "error",
