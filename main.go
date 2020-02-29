@@ -36,6 +36,12 @@ func IsLetters(s string) bool {
 	}
 	return true
 }
+
+func checkPreviousType(tokenList []Token, index int, tokenType string) bool{
+	return tokenList[index-1].Type == "whitespace" &&
+			tokenList[index-2].Type == tokenType
+}
+
 func generateTokens(this js.Value, inputs []js.Value) interface{} {
 	plain := strings.ReplaceAll(inputs[0].String(), " ", "&nbsp;")
 	leftParamJSON := inputs[1].String()
@@ -101,10 +107,8 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 			if index == 0 ||
 				tokenList[index-1].Type == "openingParentheses" ||
 				((index-1) == 0 && tokenList[0].Type == "whitespace") ||
-				(tokenList[index-1].Type == "whitespace" &&
-					tokenList[index-2].Type == "openingParentheses") ||
-				(tokenList[index-1].Type == "whitespace" &&
-					tokenList[index-2].Type == "operator"){
+				checkPreviousType(tokenList, index,"operator")||
+				checkPreviousType(tokenList, index,"openingParentheses"){
 				notFound := true
 				lPindex := 0
 				for lPindex < len(leftParam1) && notFound {
