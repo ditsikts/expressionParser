@@ -160,16 +160,23 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 					}
 				}
 			} else if checkPreviousTypeList(tokenList, index, []string{"city", "car"}) {
+				var filteredMidParam []MidParam
+				for _, tempMidParam := range midParam1{
+					if tempMidParam.HasLeft == tokenList[index-2].Type{
+						filteredMidParam = append(filteredMidParam, tempMidParam)
+					}
+				}
+
 				notFound := true
 				mPindex := 0
-				for mPindex < len(midParam1) && notFound {
+				for mPindex < len(filteredMidParam) && notFound {
 					opindex := 0
-					for opindex < len(midParam1[mPindex].Operators) && notFound {
-						if midParam1[mPindex].Operators[opindex] == plainSplitted[index] {
+					for opindex < len(filteredMidParam[mPindex].Operators) && notFound {
+						if filteredMidParam[mPindex].Operators[opindex] == plainSplitted[index] {
 							tokenList[index] = Token{
-								Text:     midParam1[mPindex].Operators[opindex],
-								Type:     midParam1[mPindex].Type,
-								CssClass: strings.ToLower(midParam1[mPindex].Type),
+								Text:     filteredMidParam[mPindex].Operators[opindex],
+								Type:     filteredMidParam[mPindex].Type,
+								CssClass: strings.ToLower(filteredMidParam[mPindex].Type),
 							}
 							notFound = false
 						}
