@@ -27,6 +27,16 @@ type LeftParam struct {
 	HasLeft []string `json:"hasLeft"`
 	Props   []Prop   `json:"props"`
 }
+type RightParam struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+type MidParam struct {
+	Type string `json:"type"`
+	HasLeft string `json:"hasLeft"`
+	Operators []string `json:"operators"`
+	RightParams []RightParam `json:"rightParam"`
+}
 
 func IsLetters(s string) bool {
 	for _, r := range s {
@@ -45,15 +55,21 @@ func checkPreviousType(tokenList []Token, index int, tokenType string) bool{
 func generateTokens(this js.Value, inputs []js.Value) interface{} {
 	plain := strings.ReplaceAll(inputs[0].String(), " ", "&nbsp;")
 	leftParamJSON := inputs[1].String()
-	//midParamJSON := inputs[2].String()
+	midParamJSON := inputs[2].String()
 
 	var leftParam1 []LeftParam
 	err := json.Unmarshal([]byte(leftParamJSON), &leftParam1)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+	var midParam1 []MidParam
+	err2 := json.Unmarshal([]byte(midParamJSON), &midParam1)
+	if err2 != nil {
+		fmt.Println(err2.Error())
+	}
 
-	fmt.Println(leftParam1[1].Type)
+	fmt.Println(midParam1[1].Type)
+
 	re := regexp.MustCompile(`\w+|(&nbsp;)+|!=|.`)
 	plainSplitted := re.FindAllString(plain, -1)
 
