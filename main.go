@@ -191,6 +191,34 @@ func generateTokens(this js.Value, inputs []js.Value) interface{} {
 						CssClass: "error",
 					}
 				}
+			}else if checkPreviousTypeList(tokenList, index, []string{"buildings", "states","carstate"}){
+				var filteredMidParam MidParam
+				for _, tempMidParam := range midParam1{
+					if tempMidParam.Type == tokenList[index-2].Type{
+						filteredMidParam = tempMidParam
+					}
+				}
+
+				notFound := true
+				rPindex := 0
+				for rPindex < len(filteredMidParam.RightParams) && notFound {
+					if filteredMidParam.RightParams[rPindex].Name == plainSplitted[index] {
+						tokenList[index] = Token{
+							Text:     filteredMidParam.RightParams[rPindex].Name,
+							Type:     filteredMidParam.Type,
+							CssClass: strings.ToLower(filteredMidParam.RightParams[rPindex].Type),
+						}
+						notFound = false
+					}
+					rPindex += 1
+				}
+				if notFound {
+					tokenList[index] = Token{
+						Text:     plainSplitted[index],
+						Type:     "error",
+						CssClass: "error",
+					}
+				}
 			} else {
 				tokenList[index] = Token{
 					Text:     plainSplitted[index],
